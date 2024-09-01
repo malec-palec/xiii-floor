@@ -6,12 +6,17 @@
   "scripts": {
     "dev": "start vite --open",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "zip": "gulp"
   },
   "keywords": [],
   "author": "glebv",
   "license": "UNLICENSED",
   "devDependencies": {
+    "fs-extra": "^11.2.0",
+    "gulp": "^5.0.0",
+    "gulp-size": "^5.0.0",
+    "gulp-zip": "^6.0.0",
     "typescript": "^5.5.4",
     "vite": "^5.4.2",
     "vite-plugin-singlefile": "^2.0.2"
