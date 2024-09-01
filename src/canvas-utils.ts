@@ -1,3 +1,4 @@
+import { ScaleX } from "./scalex";
 import type { Tail } from "./types";
 import { createObjectPool } from "./utils";
 
@@ -141,5 +142,19 @@ export const colorizeImage = (
   context.globalCompositeOperation = "source-in";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
+  return canvas;
+};
+
+export const upscale = (image: HTMLImageElement, scaleFactor: 2 | 3) => {
+  const canvas = canvasPool.alloc();
+  const context = canvas.getContext("2d")!;
+  context.drawImage(image, 0, 0);
+  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+  const scaleFunc = (scaleFactor === 2 ? ScaleX.scale2x : ScaleX.scale3x).bind(ScaleX);
+  const scaledImageData = scaleFunc(imageData);
+  // canvas.width *= scaleFactor;
+  // canvas.height *= scaleFactor;
+  // context.clearRect(0, 0, canvas.width, canvas.height);
+  context.putImageData(scaledImageData, 0, 0);
   return canvas;
 };
