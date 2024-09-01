@@ -1,0 +1,20 @@
+{
+  "name": "xiii-floor",
+  "version": "1.0.0",
+  "description": "js13kGames 2024 competition entry",
+  "private": "true",
+  "scripts": {
+    "dev": "start vite --open",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "glebv",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2",
+    "vite-plugin-singlefile": "^2.0.2"
+  },
+  "type": "module"
+}
