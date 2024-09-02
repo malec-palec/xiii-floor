@@ -1,4 +1,4 @@
-import { colorizeImage, drawRegion, eraseColor, upscale, scalePixelated, wrapCanvasFunc } from "./canvas-utils";
+import { colorizeImage, drawRegion, eraseColor, scalePixelated, wrapCanvasFunc } from "./canvas-utils";
 
 export class Game {
   private atlas: HTMLCanvasElement;
@@ -14,8 +14,8 @@ export class Game {
     this.atlas = canvas;
     this.context = c.getContext("2d")!;
   }
-  update(dt: number) {}
-  draw() {
+  update(dt: number): void {}
+  draw(): void {
     const { context } = this;
     context.fillStyle = "grey";
     context.fillRect(0, 0, c.width, c.height);

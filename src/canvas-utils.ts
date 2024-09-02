@@ -9,7 +9,7 @@ const canvasPool = createObjectPool(
   (canvas) => {
     const context = canvas.getContext("2d")!;
     context.clearRect(0, 0, canvas.width, canvas.height);
-  }
+  },
 );
 
 export const wrapCanvasFunc = <
@@ -19,12 +19,12 @@ export const wrapCanvasFunc = <
     src: HTMLCanvasElement,
     ...rest: any[]
   ) => HTMLCanvasElement,
-  K extends Tail<Tail<Parameters<T>>>
+  K extends Tail<Tail<Parameters<T>>>,
 >(
   func: T,
   source: HTMLCanvasElement,
   ...rest: Tail<K>
-) => {
+): HTMLCanvasElement => {
   const canvas = canvasPool.alloc();
   const dest = func(canvas, canvas.getContext("2d")!, source, ...rest);
   canvasPool.free(source);
@@ -37,7 +37,7 @@ export const eraseColor = (
   image: BetterCanvasImageSource,
   r = 0,
   g = r,
-  b = r
+  b = r,
 ): HTMLCanvasElement => {
   canvas.width = <number>image.width;
   canvas.height = <number>image.height;
@@ -58,7 +58,7 @@ export const eraseColor = (
 
 export const getOpaqueBounds = (
   canvas: HTMLCanvasElement,
-  context = canvas.getContext("2d")!
+  context = canvas.getContext("2d")!,
 ): [number, number, number, number] => {
   const canvasWidth = canvas.width;
   const canvasHeight = canvas.height;
@@ -89,7 +89,7 @@ export const cropAlpha = (
   canvas: HTMLCanvasElement,
   context: CanvasRenderingContext2D,
   image: CanvasImageSource,
-  [minX, minY, maxX, maxY]: [number, number, number, number]
+  [minX, minY, maxX, maxY]: [number, number, number, number],
 ): HTMLCanvasElement => {
   canvas.width = maxX - minX + 1;
   canvas.height = maxY - minY + 1;
@@ -102,8 +102,8 @@ export const scalePixelated = (
   context: CanvasRenderingContext2D,
   image: BetterCanvasImageSource,
   scaleX: number,
-  scaleY = scaleX
-) => {
+  scaleY = scaleX,
+): HTMLCanvasElement => {
   canvas.width = <number>image.width * scaleX;
   canvas.height = <number>image.height * scaleY;
   context.imageSmoothingEnabled = false;
@@ -120,7 +120,7 @@ export const drawRegion = (
   dx = 0,
   dy = 0,
   canvas = canvasPool.alloc(),
-  context = canvas.getContext("2d")!
+  context = canvas.getContext("2d")!,
 ): HTMLCanvasElement => {
   canvas.width = sw;
   canvas.height = sh;
@@ -132,7 +132,7 @@ export const colorizeImage = (
   image: BetterCanvasImageSource,
   color: string,
   canvas = canvasPool.alloc(),
-  context = canvas.getContext("2d")!
+  context = canvas.getContext("2d")!,
 ): HTMLCanvasElement => {
   canvas.width = <number>image.width;
   canvas.height = <number>image.height;
@@ -145,7 +145,7 @@ export const colorizeImage = (
   return canvas;
 };
 
-export const upscale = (image: HTMLImageElement, scaleFactor: 2 | 3) => {
+export const upscale = (image: HTMLImageElement, scaleFactor: 2 | 3): HTMLCanvasElement => {
   const canvas = canvasPool.alloc();
   const context = canvas.getContext("2d")!;
   context.drawImage(image, 0, 0);

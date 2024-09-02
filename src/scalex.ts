@@ -6,7 +6,7 @@ export class ScaleX {
 
     for (let i = 0; i < width; i++) {
       for (let j = 0; j < height; j++) {
-        const index = (j * width + i) * 4;
+        // const index = (j * width + i) * 4;
         const E = this.getPixel(imageData, i, j);
 
         let E0 = E,

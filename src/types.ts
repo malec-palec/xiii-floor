@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> & Partial<Pick<Type, Key>>;
 
 type Head<T extends any[]> = T extends [any, ...any[]] ? T[0] : never;
@@ -9,4 +10,4 @@ type AssignType<T extends any[]> = {
   1: Head<T>;
 }[HasTail<T> extends true ? 0 : 1];
 
-export type { MakeOptional, Head, Tail, AssignType };
+export type { AssignType, Head, MakeOptional, Tail };

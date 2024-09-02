@@ -1,5 +1,5 @@
-import { Game } from "./game";
 import ATLAS_URL from "./assets/a.png";
+import { Game } from "./game";
 import { loadImage } from "./utils";
 
 const main = async () => {

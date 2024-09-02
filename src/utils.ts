@@ -6,21 +6,29 @@ export const loadImage = (url: string): Promise<HTMLImageElement> =>
     image.onerror = reject;
   });
 
-export const createObjectPool = <T>(create: () => T, reset?: (obj: T) => void) => {
+export const createObjectPool = <T>(
+  create: () => T,
+  reset?: (obj: T) => void,
+): {
+  free(obj: T): void;
+  alloc(): T;
+  getSize(): number;
+  dispose(): void;
+} => {
   const objects: Array<T> = [];
-  let allocCount = 0;
-  let freeCount = 0;
+  // let allocCount = 0;
+  // let freeCount = 0;
   return {
     free(obj: T) {
       if (reset) reset(obj);
-      freeCount++;
+      // freeCount++;
       objects.push(obj);
     },
     alloc(): T {
       if (objects.length > 0) {
         return objects.pop()!;
       }
-      allocCount++;
+      // allocCount++;
       return create();
     },
     getSize() {
