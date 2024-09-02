@@ -2,6 +2,21 @@ import ATLAS_URL from "./assets/a.png";
 import { Game } from "./game";
 import { loadImage } from "./utils";
 
+const onOrientationChanged = () => {
+  const angle = screen.orientation.angle;
+  if (angle === 0 || angle === 180) {
+    // Portrait mode
+    c.style.transform = "rotate(0deg)";
+    c.style.width = "100vw";
+  } else if (angle === 90 || angle === -90) {
+    // Landscape mode
+    c.style.transform = "rotate(-90deg)";
+    c.style.width = "auto";
+  }
+};
+window.addEventListener("orientationchange", onOrientationChanged);
+onOrientationChanged();
+
 const main = async () => {
   const atlas = await loadImage(ATLAS_URL);
 

@@ -4,7 +4,7 @@
   "description": "js13kGames 2024 competition entry",
   "private": "true",
   "scripts": {
-    "dev": "start vite --open",
+    "dev": "start vite --open --host",
     "build": "vite build",
     "preview": "vite preview",
     "zip": "gulp",
