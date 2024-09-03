@@ -145,15 +145,15 @@ export const colorizeImage = (
   return canvas;
 };
 
-export const upscale = (image: HTMLImageElement, scaleFactor: 2 | 3): HTMLCanvasElement => {
+export const upscale = (image: HTMLCanvasElement, scaleFactor: 2 | 3): HTMLCanvasElement => {
   const canvas = canvasPool.alloc();
   const context = canvas.getContext("2d")!;
   context.drawImage(image, 0, 0);
   const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
   const scaleFunc = (scaleFactor === 2 ? ScaleX.scale2x : ScaleX.scale3x).bind(ScaleX);
   const scaledImageData = scaleFunc(imageData);
-  // canvas.width *= scaleFactor;
-  // canvas.height *= scaleFactor;
+  canvas.width *= scaleFactor * 16;
+  canvas.height *= scaleFactor * 16;
   // context.clearRect(0, 0, canvas.width, canvas.height);
   context.putImageData(scaledImageData, 0, 0);
   return canvas;

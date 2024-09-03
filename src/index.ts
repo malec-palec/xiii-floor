@@ -1,6 +1,12 @@
 import ATLAS_URL from "./assets/a.png";
+import BUTTON_URL from "./assets/b.png";
 import { Game } from "./game";
+import { getScreenSize } from "./registry";
 import { loadImage } from "./utils";
+
+const [w, h] = getScreenSize();
+c.width = w;
+c.height = h;
 
 const onOrientationChanged = () => {
   const angle = screen.orientation.angle;
@@ -18,7 +24,7 @@ window.addEventListener("orientationchange", onOrientationChanged);
 onOrientationChanged();
 
 const main = async () => {
-  const atlas = await loadImage(ATLAS_URL);
+  const assets = await Promise.all([loadImage(ATLAS_URL), loadImage(BUTTON_URL)]);
 
   let now: number;
   let dt: number;
@@ -28,7 +34,7 @@ const main = async () => {
   onfocus = () => (focused = true);
   onblur = () => (focused = false);
 
-  const game = new Game(atlas);
+  const game = new Game(assets);
   const loop = (t: number) => {
     requestAnimationFrame(loop);
 
