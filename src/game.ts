@@ -1,4 +1,4 @@
-import { colorizeImage, drawRegion, eraseColor, scalePixelated, wrapCanvasFunc } from "./canvas-utils";
+import { colorizeInPlace, eraseColorInPlace, getImageRegion, scalePixelated, wrapCanvasFunc } from "./canvas-utils";
 import { GAME_AREA_SIZE, isMobile, SIDEBAR_SIZE } from "./registry";
 
 const numFloors = 8;
@@ -10,10 +10,11 @@ export class Game {
 
   constructor(assets: HTMLImageElement[]) {
     const [atlas, butAtlas] = assets;
-    let atlasCanvas = drawRegion(atlas, 0, 0, 9, 9);
-    atlasCanvas = wrapCanvasFunc(eraseColor, atlasCanvas);
-    atlasCanvas = wrapCanvasFunc(scalePixelated, atlasCanvas, 4);
-    atlasCanvas = colorizeImage(atlasCanvas, "black");
+
+    const [atlasCanvas, atlasContext] = getImageRegion(atlas, 0, 0, 9, 9);
+    eraseColorInPlace(atlasCanvas, atlasContext);
+    colorizeInPlace(atlasCanvas, atlasContext, "black");
+    this.atlas = wrapCanvasFunc(scalePixelated, atlasCanvas, 4);
 
     const BUTTON_TILE_SIZE = 16;
     const butRows = butAtlas.width / BUTTON_TILE_SIZE;
@@ -22,20 +23,17 @@ export class Game {
     for (y = 0; y < butCols; y++) {
       for (x = 0; x < butRows; x++) {
         i = x + y * butRows;
-        let butCanvas = drawRegion(
+        const [butCanvas] = getImageRegion(
           butAtlas,
           x * BUTTON_TILE_SIZE,
           y * BUTTON_TILE_SIZE,
           BUTTON_TILE_SIZE,
           BUTTON_TILE_SIZE,
         );
-        butCanvas = wrapCanvasFunc(scalePixelated, butCanvas, 5);
-        // butCanvas = upscale(butCanvas, 2);
-        this.buttons[i] = butCanvas;
+        this.buttons[i] = wrapCanvasFunc(scalePixelated, butCanvas, 5);
       }
     }
 
-    this.atlas = atlasCanvas;
     this.context = c.getContext("2d")!;
   }
   update(dt: number): void {}
@@ -52,7 +50,6 @@ export class Game {
       context.fillRect(0, GAME_AREA_SIZE - floorHeight * i - wallHeight, GAME_AREA_SIZE, wallHeight);
     }
 
-    context.fillStyle = "0";
     if (isMobile) {
       context.fillRect(0, GAME_AREA_SIZE, GAME_AREA_SIZE, SIDEBAR_SIZE);
       for (let i = 0; i < this.buttons.length; i++) {
