@@ -1,5 +1,7 @@
 import ATLAS_URL from "./assets/a.png";
 import BUTTON_URL from "./assets/b.png";
+import FRAME_URL from "./assets/f.png";
+import PATTERN_URL from "./assets/p.png";
 import { Game } from "./game";
 import { getScreenSize } from "./registry";
 import { loadImage } from "./utils";
@@ -24,7 +26,7 @@ window.addEventListener("orientationchange", onOrientationChanged);
 onOrientationChanged();
 
 const main = async () => {
-  const assets = await Promise.all([loadImage(ATLAS_URL), loadImage(BUTTON_URL)]);
+  const assets = await Promise.all([ATLAS_URL, BUTTON_URL, FRAME_URL, PATTERN_URL].map(loadImage));
 
   let now: number;
   let dt: number;

@@ -1,7 +1,7 @@
 import type { Tail } from "./types";
 import { createObjectPool } from "./utils";
 
-const canvasPool = createObjectPool(
+export const canvasPool = createObjectPool(
   () => {
     return document.createElement("canvas");
   },
@@ -74,7 +74,7 @@ export const cropAlpha = (
 export const scalePixelated = (
   canvas: HTMLCanvasElement,
   context: CanvasRenderingContext2D,
-  image: HTMLCanvasElement,
+  image: Exclude<CanvasImageSource, VideoFrame>,
   scaleX: number,
   scaleY = scaleX,
 ): HTMLCanvasElement => {
@@ -123,4 +123,46 @@ export const colorizeInPlace = (canvas: HTMLCanvasElement, context: CanvasRender
   context.fillStyle = color;
   context.globalCompositeOperation = "source-in";
   context.fillRect(0, 0, canvas.width, canvas.height);
+};
+
+export const drawSlices = (
+  img: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D,
+  tx: number,
+  ty: number,
+  width: number,
+  height: number,
+): void => {
+  const s = img.width / 3;
+
+  // define the 9 parts as [x, y, w, h]
+  const part1 = [0, 0, s, s] as const;
+  const part2 = [s, 0, s, s] as const;
+  const part3 = [s * 2, 0, s, s] as const;
+  const part4 = [0, s, s, s] as const;
+  const part5 = [s, s, s, s] as const;
+  const part6 = [s * 2, s, s, s] as const;
+  const part7 = [0, s * 2, s, s] as const;
+  const part8 = [s, s * 2, s, s] as const;
+  const part9 = [s * 2, s * 2, s, s] as const;
+
+  ctx.save();
+  ctx.translate(tx, ty);
+
+  // draw the corners
+  ctx.drawImage(img, ...part1, 0, 0, s, s); // top left
+  ctx.drawImage(img, ...part3, width - s, 0, s, s); // top right
+  ctx.drawImage(img, ...part7, 0, height - s, s, s); // bottom left
+  ctx.drawImage(img, ...part9, width - s, height - s, s, s); // bottom right
+
+  // draw the edges
+  ctx.drawImage(img, ...part2, s, 0, width - 2 * s, s); // top
+  ctx.drawImage(img, ...part8, s, height - s, width - 2 * s, s); // bottom
+  ctx.drawImage(img, ...part4, 0, s, s, height - 2 * s); // left
+  ctx.drawImage(img, ...part6, width - s, s, s, height - 2 * s); // right
+
+  // draw the center
+  ctx.drawImage(img, ...part5, s, s, width - 2 * s, height - 2 * s);
+
+  ctx.restore();
 };

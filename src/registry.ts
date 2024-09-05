@@ -1,3 +1,5 @@
+export const TILE_SIZE = 16;
+
 export const GAME_AREA_SIZE = 600;
 export const SIDEBAR_SIZE = 200;
 
