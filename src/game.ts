@@ -8,6 +8,7 @@ import {
   wrapCanvasFunc,
 } from "./canvas-utils";
 import { GAME_AREA_SIZE, isMobile, SIDEBAR_SIZE } from "./registry";
+import { clamp, logDebug } from "./utils";
 
 const numFloors = 8;
 
@@ -19,7 +20,7 @@ export class Game {
   private frame: HTMLCanvasElement;
   private pattern: CanvasPattern;
 
-  private buttonArea = [32, 32, 64, 64] as const;
+  private buttonArea = [512, 512, 64, 64] as const;
 
   constructor(assets: HTMLImageElement[]) {
     const [atlas, butAtlas, frameImage, patternImage] = assets;
@@ -54,6 +55,16 @@ export class Game {
     this.frame = scalePixelated(frameCanvas, frameContext, frameImage, 2);
 
     this.pattern = this.context.createPattern(patternImage, "repeat")!;
+
+    c.addEventListener("click", (event) => {
+      const rect = c.getBoundingClientRect();
+      const [mx, my] = translateCoordinate(event.clientX, event.clientY, rect.top);
+
+      const [buttonX, buttonY, buttonWidth, buttonHeight] = this.buttonArea;
+      if (mx >= buttonX && mx <= buttonX + buttonWidth && my >= buttonY && my <= buttonY + buttonHeight) {
+        logDebug("Button clicked!");
+      }
+    });
   }
   update(dt: number): void {}
   draw(): void {
@@ -86,6 +97,13 @@ export class Game {
     context.fillRect(sx, 16 - wallSize, 32, 16 * 3);
     context.fillRect(sx + 32, 16 - wallSize, 32, 16 * 3);
 
+    context.save();
+    context.rect(100, 100, 300, 300);
+    context.clip();
+    context.fillStyle = "blue";
+    context.fillRect(200, 200, 400, 400);
+    context.restore();
+
     context.fillStyle = "#111111";
     for (let i = 0; i < 10; i++) {
       context.drawImage(atlas, 16 + (atlas.width - 12) * i, floorHeight - atlas.height - wallSize);
@@ -97,4 +115,10 @@ export class Game {
     context.fillStyle = "green";
     context.fillRect(...this.buttonArea);
   }
+}
+
+function translateCoordinate(clientX: number, clientY: number, offY: number) {
+  const scaledWidth = (c.width * c.clientHeight) / c.height;
+  const tx = clamp(clientX - (c.clientWidth - scaledWidth) / 2, 0, scaledWidth);
+  return [(tx * c.width) / scaledWidth, ((clientY - offY) * c.height) / c.clientHeight];
 }

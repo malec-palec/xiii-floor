@@ -39,3 +39,10 @@ export const createObjectPool = <T>(
     },
   };
 };
+
+export const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
+
+export function logDebug(...messages: unknown[]): void {
+  l.value += [...messages].join(" ") + "\n";
+  l.scrollTop = l.scrollHeight;
+}
