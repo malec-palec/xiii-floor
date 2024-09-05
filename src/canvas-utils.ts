@@ -74,7 +74,7 @@ export const cropAlpha = (
 export const scalePixelated = (
   canvas: HTMLCanvasElement,
   context: CanvasRenderingContext2D,
-  image: Exclude<CanvasImageSource, VideoFrame>,
+  image: DrawImageSource,
   scaleX: number,
   scaleY = scaleX,
 ): HTMLCanvasElement => {
@@ -86,7 +86,7 @@ export const scalePixelated = (
 };
 
 export const getImageRegion = (
-  imageSource: CanvasImageSource,
+  imageSource: DrawImageSource,
   sx: number,
   sy: number,
   sw: number,
@@ -126,7 +126,7 @@ export const colorizeInPlace = (canvas: HTMLCanvasElement, context: CanvasRender
 };
 
 export const drawSlices = (
-  img: HTMLCanvasElement,
+  img: DrawImageSource,
   ctx: CanvasRenderingContext2D,
   tx: number,
   ty: number,

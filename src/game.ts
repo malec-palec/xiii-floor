@@ -7,7 +7,9 @@ import {
   scalePixelated,
   wrapCanvasFunc,
 } from "./canvas-utils";
+import Container from "./container";
 import { GAME_AREA_SIZE, isMobile, SIDEBAR_SIZE } from "./registry";
+import Sprite from "./sprite";
 import { clamp, logDebug } from "./utils";
 
 const numFloors = 8;
@@ -21,6 +23,9 @@ export class Game {
   private pattern: CanvasPattern;
 
   private buttonArea = [512, 512, 64, 64] as const;
+
+  private root: Container;
+  private char: Sprite;
 
   constructor(assets: HTMLImageElement[]) {
     const [atlas, butAtlas, frameImage, patternImage] = assets;
@@ -49,6 +54,7 @@ export class Game {
     }
 
     this.context = c.getContext("2d")!;
+    this.context.imageSmoothingEnabled = false;
 
     const frameCanvas = canvasPool.alloc();
     const frameContext = frameCanvas.getContext("2d")!;
@@ -65,8 +71,14 @@ export class Game {
         logDebug("Button clicked!");
       }
     });
+
+    this.root = new Container(100, 100);
+    this.char = new Sprite(this.atlas, 100, 100);
+    this.root.children.push(this.char);
   }
-  update(dt: number): void {}
+  update(dt: number): void {
+    this.root.update(dt);
+  }
   draw(): void {
     const { context, atlas } = this;
     context.fillStyle = "#EEEEEE";
@@ -114,6 +126,8 @@ export class Game {
 
     context.fillStyle = "green";
     context.fillRect(...this.buttonArea);
+
+    this.root.draw(context);
   }
 }
 
