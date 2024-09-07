@@ -1,138 +1,75 @@
-import {
-  canvasPool,
-  colorizeInPlace,
-  drawSlices,
-  eraseColorInPlace,
-  getImageRegion,
-  scalePixelated,
-  wrapCanvasFunc,
-} from "./canvas-utils";
-import Container from "./container";
-import { GAME_AREA_SIZE, isMobile, SIDEBAR_SIZE } from "./registry";
-import Sprite from "./sprite";
-import { clamp, logDebug } from "./utils";
+import { IAssetsProvider } from "./assets";
+import { GameScene } from "./scenes/game-scene";
+import { IScene, ISceneManager, SceneName } from "./scenes/scene";
+import { TitleScene } from "./scenes/title-scene";
+import { ITweenerProvider, Tweener } from "./core/tweener";
+import { clamp } from "./utils";
 
-const numFloors = 8;
-
-export class Game {
-  private atlas: HTMLCanvasElement;
-  private buttons: HTMLCanvasElement[] = [];
-  private context: CanvasRenderingContext2D;
-
-  private frame: HTMLCanvasElement;
-  private pattern: CanvasPattern;
-
-  private buttonArea = [512, 512, 64, 64] as const;
-
-  private root: Container;
-  private char: Sprite;
-
-  constructor(assets: HTMLImageElement[]) {
-    const [atlas, butAtlas, frameImage, patternImage] = assets;
-
-    const [atlasCanvas, atlasContext] = getImageRegion(atlas, 0, 0, 9, 9);
-    eraseColorInPlace(atlasCanvas, atlasContext);
-    colorizeInPlace(atlasCanvas, atlasContext, "#111111");
-    this.atlas = wrapCanvasFunc(scalePixelated, atlasCanvas, 3);
-
-    const BUTTON_TILE_SIZE = 16;
-    const butRows = butAtlas.width / BUTTON_TILE_SIZE;
-    const butCols = butAtlas.height / BUTTON_TILE_SIZE;
-    let x: number, y: number, i: number;
-    for (y = 0; y < butCols; y++) {
-      for (x = 0; x < butRows; x++) {
-        i = x + y * butRows;
-        const [butCanvas] = getImageRegion(
-          butAtlas,
-          x * BUTTON_TILE_SIZE,
-          y * BUTTON_TILE_SIZE,
-          BUTTON_TILE_SIZE,
-          BUTTON_TILE_SIZE,
-        );
-        this.buttons[i] = wrapCanvasFunc(scalePixelated, butCanvas, 5);
-      }
-    }
-
-    this.context = c.getContext("2d")!;
-    this.context.imageSmoothingEnabled = false;
-
-    const frameCanvas = canvasPool.alloc();
-    const frameContext = frameCanvas.getContext("2d")!;
-    this.frame = scalePixelated(frameCanvas, frameContext, frameImage, 2);
-
-    this.pattern = this.context.createPattern(patternImage, "repeat")!;
-
-    c.addEventListener("click", (event) => {
-      const rect = c.getBoundingClientRect();
-      const [mx, my] = translateCoordinate(event.clientX, event.clientY, rect.top);
-
-      const [buttonX, buttonY, buttonWidth, buttonHeight] = this.buttonArea;
-      if (mx >= buttonX && mx <= buttonX + buttonWidth && my >= buttonY && my <= buttonY + buttonHeight) {
-        logDebug("Button clicked!");
-      }
-    });
-
-    this.root = new Container(100, 100);
-    this.char = new Sprite(this.atlas, 100, 100);
-    this.root.children.push(this.char);
-  }
-  update(dt: number): void {
-    this.root.update(dt);
-  }
-  draw(): void {
-    const { context, atlas } = this;
-    context.fillStyle = "#EEEEEE";
-    context.fillRect(0, 0, GAME_AREA_SIZE, GAME_AREA_SIZE);
-
-    const floorHeight = 16 * 4;
-    const wallSize = 16 * 0.5;
-
-    context.fillStyle = "#111111";
-    for (let i = 1; i <= numFloors; i++) {
-      context.fillRect(0, floorHeight * i - wallSize, GAME_AREA_SIZE, wallSize);
-    }
-
-    if (isMobile) {
-      drawSlices(this.frame, this.context, 0, GAME_AREA_SIZE, GAME_AREA_SIZE, SIDEBAR_SIZE);
-      // for (let i = 0; i < this.buttons.length; i++) {
-      //   context.drawImage(this.buttons[i], 20 + Math.floor(i / 2) * 100, GAME_AREA_SIZE + 10 + (i % 2) * 100);
-      // }
-    } else {
-      drawSlices(this.frame, this.context, GAME_AREA_SIZE, 0, SIDEBAR_SIZE, GAME_AREA_SIZE);
-      // for (let i = 0; i < this.buttons.length; i++) {
-      //   context.drawImage(this.buttons[i], GAME_AREA_SIZE + 10 + (i % 2) * 100, 20 + Math.floor(i / 2) * 100);
-      // }
-    }
-
-    const sx = 120;
-    context.fillStyle = "red";
-    context.fillRect(sx, 16 - wallSize, 32, 16 * 3);
-    context.fillRect(sx + 32, 16 - wallSize, 32, 16 * 3);
-
-    context.save();
-    context.rect(100, 100, 300, 300);
-    context.clip();
-    context.fillStyle = "blue";
-    context.fillRect(200, 200, 400, 400);
-    context.restore();
-
-    context.fillStyle = "#111111";
-    for (let i = 0; i < 10; i++) {
-      context.drawImage(atlas, 16 + (atlas.width - 12) * i, floorHeight - atlas.height - wallSize);
-    }
-
-    context.fillStyle = this.pattern;
-    context.fillRect(0, floorHeight * numFloors, GAME_AREA_SIZE, GAME_AREA_SIZE - floorHeight * numFloors);
-
-    context.fillStyle = "green";
-    context.fillRect(...this.buttonArea);
-
-    this.root.draw(context);
-  }
+export interface IGame extends ISceneManager, IAssetsProvider, ITweenerProvider {
+  resize(width: number, height: number): void;
 }
 
-function translateCoordinate(clientX: number, clientY: number, offY: number) {
-  const scaledWidth = (c.width * c.clientHeight) / c.height;
-  const tx = clamp(clientX - (c.clientWidth - scaledWidth) / 2, 0, scaledWidth);
-  return [(tx * c.width) / scaledWidth, ((clientY - offY) * c.height) / c.clientHeight];
+export class Game implements IGame {
+  private context: CanvasRenderingContext2D;
+  private scene: IScene;
+
+  tweener = new Tweener();
+
+  constructor(public assets: HTMLImageElement[]) {
+    this.context = c.getContext("2d")!;
+    this.scene = new TitleScene(this);
+
+    c.onclick = ({ clientX, clientY }) => {
+      const rect = c.getBoundingClientRect();
+      const scaledWidth = (c.width * c.clientHeight) / c.height;
+      this.scene.onClick(
+        (clamp(clientX - (c.clientWidth - scaledWidth) / 2, 0, scaledWidth) * c.width) / scaledWidth,
+        ((clientY - rect.top) * c.height) / c.clientHeight,
+      );
+    };
+  }
+
+  changeScene(name: SceneName): void {
+    const { scene, context } = this;
+    scene.destroy();
+    context.clearRect(0, 0, c.width, c.height);
+    let newScene: IScene;
+    switch (name) {
+      case SceneName.Title:
+        newScene = new TitleScene(this);
+        break;
+      case SceneName.Game:
+        newScene = new GameScene(this);
+        break;
+    }
+    this.scene = newScene;
+  }
+
+  update(dt: number): void {
+    const { scene, tweener, context } = this;
+    scene.update(dt);
+    tweener.update(dt);
+
+    scene.draw(context);
+  }
+
+  resize(width: number, height: number): void {
+    c.width = width;
+    c.height = height;
+    // this.context.imageSmoothingEnabled = false;
+  }
+
+  // TODO: show message on top: "The game is intended to be played in portrait mode. Please, rotate the device."
+  handleRotation(): void {
+    const angle = screen.orientation.angle;
+    if (angle === 0 || angle === 180) {
+      // Portrait mode
+      c.style.transform = "rotate(0deg)";
+      c.style.width = "100vw";
+    } else if (angle === 90 || angle === -90) {
+      // Landscape mode
+      c.style.transform = "rotate(-90deg)";
+      c.style.width = "auto";
+    }
+  }
 }

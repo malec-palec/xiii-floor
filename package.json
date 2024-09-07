@@ -5,6 +5,8 @@
   "private": "true",
   "scripts": {
     "start": "start vite --open --host",
+    "build": "vite build",
+    "preview": "vite preview",
     "zip": "gulp",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

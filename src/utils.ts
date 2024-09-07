@@ -1,11 +1,3 @@
-export const loadImage = (url: string): Promise<HTMLImageElement> =>
-  new Promise((resolve, reject) => {
-    const image = new Image();
-    image.src = url;
-    image.onload = () => resolve(image);
-    image.onerror = reject;
-  });
-
 export const createObjectPool = <T>(
   create: () => T,
   reset?: (obj: T) => void,
@@ -43,6 +35,6 @@ export const createObjectPool = <T>(
 export const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
 
 export function logDebug(...messages: unknown[]): void {
-  l.value += [...messages].join(" ") + "\n";
+  l.value += [...messages].map((o) => (typeof o === "object" ? JSON.stringify(o, null, 2) : o)).join(" ") + "\n";
   l.scrollTop = l.scrollHeight;
 }
