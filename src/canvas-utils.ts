@@ -166,3 +166,33 @@ export const drawSlices = (
 
   ctx.restore();
 };
+
+export function drawDottedGrid(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  tileSize: number,
+): void {
+  // Set line style to dashed
+  ctx.setLineDash([5, 5]); // [dash length, space length]
+  ctx.strokeStyle = "blue";
+  ctx.lineWidth = 1;
+  // Draw vertical lines
+  for (let i = x; i <= x + width; i += tileSize) {
+    ctx.beginPath();
+    ctx.moveTo(i, y);
+    ctx.lineTo(i, y + height);
+    ctx.stroke();
+  }
+  // Draw horizontal lines
+  for (let j = y; j <= y + height; j += tileSize) {
+    ctx.beginPath();
+    ctx.moveTo(x, j);
+    ctx.lineTo(x + width, j);
+    ctx.stroke();
+  }
+  // Reset line dash
+  ctx.setLineDash([]);
+}

@@ -1,8 +1,8 @@
 import { IAssetsProvider } from "./assets";
+import { ITweenerProvider, Tweener } from "./core/tweener";
 import { GameScene } from "./scenes/game-scene";
 import { IScene, ISceneManager, SceneName } from "./scenes/scene";
 import { TitleScene } from "./scenes/title-scene";
-import { ITweenerProvider, Tweener } from "./core/tweener";
 import { clamp } from "./utils";
 
 export interface IGame extends ISceneManager, IAssetsProvider, ITweenerProvider {
@@ -17,7 +17,7 @@ export class Game implements IGame {
 
   constructor(public assets: HTMLImageElement[]) {
     this.context = c.getContext("2d")!;
-    this.scene = new TitleScene(this);
+    this.scene = new GameScene(this);
 
     c.onclick = ({ clientX, clientY }) => {
       const rect = c.getBoundingClientRect();
@@ -56,7 +56,7 @@ export class Game implements IGame {
   resize(width: number, height: number): void {
     c.width = width;
     c.height = height;
-    // this.context.imageSmoothingEnabled = false;
+    this.context.imageSmoothingEnabled = false;
   }
 
   // TODO: show message on top: "The game is intended to be played in portrait mode. Please, rotate the device."

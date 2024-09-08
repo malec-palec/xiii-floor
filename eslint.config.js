@@ -45,6 +45,7 @@ export default [
       "@typescript-eslint/no-explicit-any": ["error", { ignoreRestArgs: true }],
       "no-useless-constructor": "off",
       "@typescript-eslint/no-useless-constructor": "warn",
+      "@typescript-eslint/no-namespace": "off"
     },
   },
 ];
