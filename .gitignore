@@ -3,5 +3,4 @@ dist/
 node_modules/
 out/
 tools/
-/assets/
-/src/assets/
+src/assets/

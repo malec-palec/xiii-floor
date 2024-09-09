@@ -7,6 +7,7 @@ import { isMobile } from "../registry";
 import { logDebug } from "../utils";
 import { Elevator, ElevatorShaft } from "./game/elevator";
 import { GameArea } from "./game/game-area";
+import { LiftController, LiftModel } from "./game/lift";
 import { Sidebar } from "./game/sidebar";
 import { BaseScene } from "./scene";
 
@@ -37,8 +38,6 @@ export const getGameSceneDimensions = (numFloors: number): GameSceneDimensions =
   };
 };
 
-export const NUM_FLOORS = 8;
-
 export class GameScene extends BaseScene {
   sceneDimensions: GameSceneDimensions;
   private root: Container;
@@ -46,7 +45,18 @@ export class GameScene extends BaseScene {
   constructor(game: IGame) {
     document.querySelector<HTMLStyleElement>(".cc")!.style.imageRendering = "pixelated";
     super();
-    const sceneDimensions = getGameSceneDimensions(NUM_FLOORS);
+
+    const root = new Container();
+    const model = new LiftModel({ numFloors: 8, startFromFloorNo: 9, unavailableFloorsIndices: [3, 4, 5] });
+    new LiftController(model);
+    model.setEventDispatcher(root);
+
+    const { floors } = model;
+    for (let i = 0; i < floors.length; i++) {
+      // const floor = floors[i];
+    }
+
+    const sceneDimensions = getGameSceneDimensions(model.numFloors);
     const { canvasSize, sidebarSize, sceneWidth, sceneHeight, wallSize, gameAreaSize, floorHeight } = sceneDimensions;
     game.resize(sceneWidth, sceneHeight);
     this.sceneDimensions = sceneDimensions;
@@ -55,9 +65,7 @@ export class GameScene extends BaseScene {
     const frameCanvas = game.assets["f"];
     const fencePatternCanvas = game.assets["p"];
 
-    this.root = new Container();
-
-    const gameArea = new GameArea(gameAreaSize, floorHeight, wallSize, NUM_FLOORS, wallSize, wallSize);
+    const gameArea = new GameArea(gameAreaSize, floorHeight, wallSize, model.numFloors, wallSize, wallSize);
     const fencePattern = c.getContext("2d")!.createPattern(fencePatternCanvas, "repeat")!;
     const tileSize = 32;
 
@@ -87,17 +95,21 @@ export class GameScene extends BaseScene {
     // this.elevators = [smallElevator, largeElevator];
 
     const sidebar = new Sidebar(
+      [
+        isMobile ? canvasSize : sidebarSize,
+        isMobile ? sidebarSize : canvasSize,
+        +!isMobile * canvasSize,
+        +isMobile * canvasSize,
+      ],
       (floorId) => {
         logDebug(floorId);
       },
       frameCanvas,
-      sidebarSize,
-      canvasSize,
-      +!isMobile * canvasSize,
-      +isMobile * canvasSize,
+      floors,
     );
+    root.children.push(gameArea, sidebar);
 
-    this.root.children.push(gameArea, sidebar);
+    this.root = root;
   }
   update(dt: number): void {
     this.root.update(dt);
@@ -114,31 +126,31 @@ export class GameScene extends BaseScene {
   }
   onClick(mouseX: number, mouseY: number): void {
     this.root.dispatchEvent(new MouseEvent(mouseX, mouseY));
-
-    // const { elevators, game, sceneDimensions } = this;
-    // const smallElevator = elevators[0];
-
-    // open doors animation
-    // game.tweener.tweenProperty(
-    //   30,
-    //   0,
-    //   32,
-    //   sine,
-    //   (v) => (smallElevator.doorWidth = v),
-    //   () => {
-    //     smallElevator.doorWidth = 32;
-    //   },
-    // );
-
-    // game.tweener.tweenProperty(
-    //   120,
-    //   smallElevator.position.y,
-    //   sceneDimensions.floorHeight * 0 + 16,
-    //   sine,
-    //   (v) => (smallElevator.position.y = v),
-    //   () => {
-    //     smallElevator.position.y = sceneDimensions.floorHeight * 0 + 16;
-    //   },
-    // );
   }
 }
+
+// const { elevators, game, sceneDimensions } = this;
+// const smallElevator = elevators[0];
+
+// open doors animation
+// game.tweener.tweenProperty(
+//   30,
+//   0,
+//   32,
+//   sine,
+//   (v) => (smallElevator.doorWidth = v),
+//   () => {
+//     smallElevator.doorWidth = 32;
+//   },
+// );
+
+// game.tweener.tweenProperty(
+//   120,
+//   smallElevator.position.y,
+//   sceneDimensions.floorHeight * 0 + 16,
+//   sine,
+//   (v) => (smallElevator.position.y = v),
+//   () => {
+//     smallElevator.position.y = sceneDimensions.floorHeight * 0 + 16;
+//   },
+// );

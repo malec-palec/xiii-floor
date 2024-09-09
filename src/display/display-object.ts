@@ -1,4 +1,4 @@
-import { Event } from "../core/event";
+import { Event, IEventDispatcher } from "../core/event";
 
 export type Point = {
   x: number;
@@ -7,12 +7,11 @@ export type Point = {
 
 export const createPoint = (x = 0, y = x): Point => ({ x, y });
 
-export interface IDisplayObject {
+export interface IDisplayObject extends IEventDispatcher {
   position: Point;
   scale: Point;
   update(dt: number): void;
   draw(context: CanvasRenderingContext2D): void;
-  dispatchEvent(event: Event): void;
 }
 
 export class DisplayObject implements IDisplayObject {

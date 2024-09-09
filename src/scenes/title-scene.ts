@@ -1,7 +1,7 @@
 import { sine } from "../core/easing";
 import { IGame } from "../game";
 import { COLOR_BLACK, COLOR_WHITE, isMobile } from "../registry";
-import { getGameSceneDimensions, NUM_FLOORS } from "./game-scene";
+import { getGameSceneDimensions } from "./game-scene";
 import { BaseScene, SceneName } from "./scene";
 
 const titleText = "XIII FLOOR";
@@ -12,8 +12,9 @@ export class TitleScene extends BaseScene {
 
   constructor(game: IGame) {
     super();
-
-    const { sceneWidth, sceneHeight } = getGameSceneDimensions(NUM_FLOORS);
+    
+    const numFloors = 8;
+    const { sceneWidth, sceneHeight } = getGameSceneDimensions(numFloors);
     const scaleMult = 2;
     game.resize(sceneWidth * scaleMult, sceneHeight * scaleMult);
 

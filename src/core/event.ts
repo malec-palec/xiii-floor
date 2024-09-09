@@ -1,3 +1,7 @@
+export interface IEventDispatcher {
+  dispatchEvent(event: Event): void;
+}
+
 export class Event {
   private _accepted = false;
   get isAccepted(): boolean {
