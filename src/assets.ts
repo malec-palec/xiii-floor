@@ -4,7 +4,7 @@ import { getImageRegion } from "./canvas-utils";
 import { TILE_SIZE } from "./registry";
 
 type AssetManifestKeys = keyof typeof manifest;
-export type AssetMap = Record<AssetManifestKeys, HTMLCanvasElement>;
+export type AssetMap = Record<AssetManifestKeys, [HTMLCanvasElement, CanvasRenderingContext2D]>;
 
 export interface IAssetsProvider {
   readonly assets: AssetMap;
@@ -21,12 +21,11 @@ const loadImage = (url: string): Promise<HTMLImageElement> =>
 export const loadAssets = async (): Promise<AssetMap> => {
   const atlas = await loadImage(ATLAS_URL);
 
-  const assets: { [key: string]: HTMLCanvasElement } = {};
+  const assets: { [key: string]: [HTMLCanvasElement, CanvasRenderingContext2D] } = {};
   let key: AssetManifestKeys;
   for (key in manifest) {
     const [x, y, w = TILE_SIZE, h = TILE_SIZE] = manifest[key];
-    const [canvas] = getImageRegion(atlas, x, y, w, h);
-    assets[key] = canvas;
+    assets[key] = getImageRegion(atlas, x, y, w, h);;
   }
   return assets as AssetMap;
 };

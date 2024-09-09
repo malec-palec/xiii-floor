@@ -1,4 +1,5 @@
 import { IEventDispatcher } from "../../core/event";
+import { logDebug } from "../../utils";
 
 export type FloorData = {
   no: number;
@@ -31,4 +32,7 @@ export class LiftModel {
 
 export class LiftController {
   constructor(private model: LiftModel) {}
+  processButtonPress(floorIndex: number): void {
+    logDebug("Button pressed:", floorIndex);
+  }
 }

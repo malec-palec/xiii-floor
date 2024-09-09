@@ -1,17 +1,14 @@
-import { colorizeInPlace, drawDottedGrid, eraseColorInPlace } from "../canvas-utils";
+import { drawDottedGrid } from "../canvas-utils";
 import { MouseEvent } from "../core/event";
 import Container from "../display/container";
-import Sprite from "../display/sprite";
 import { IGame } from "../game";
 import { isMobile } from "../registry";
-import { logDebug } from "../utils";
-import { Elevator, ElevatorShaft } from "./game/elevator";
 import { GameArea } from "./game/game-area";
 import { LiftController, LiftModel } from "./game/lift";
 import { Sidebar } from "./game/sidebar";
 import { BaseScene } from "./scene";
 
-type GameSceneDimensions = {
+export type GameSceneDimensions = {
   floorHeight: number;
   wallSize: number;
   gameAreaSize: number;
@@ -48,7 +45,7 @@ export class GameScene extends BaseScene {
 
     const root = new Container();
     const model = new LiftModel({ numFloors: 8, startFromFloorNo: 9, unavailableFloorsIndices: [3, 4, 5] });
-    new LiftController(model);
+    const controller = new LiftController(model);
     model.setEventDispatcher(root);
 
     const { floors } = model;
@@ -57,43 +54,13 @@ export class GameScene extends BaseScene {
     }
 
     const sceneDimensions = getGameSceneDimensions(model.numFloors);
-    const { canvasSize, sidebarSize, sceneWidth, sceneHeight, wallSize, gameAreaSize, floorHeight } = sceneDimensions;
+    const { canvasSize, sidebarSize, sceneWidth, sceneHeight} = sceneDimensions;
     game.resize(sceneWidth, sceneHeight);
     this.sceneDimensions = sceneDimensions;
 
-    const charCanvas = game.assets["c"];
-    const frameCanvas = game.assets["f"];
-    const fencePatternCanvas = game.assets["p"];
+    const gameArea = new GameArea(sceneDimensions, model, game.assets);
 
-    const gameArea = new GameArea(gameAreaSize, floorHeight, wallSize, model.numFloors, wallSize, wallSize);
-    const fencePattern = c.getContext("2d")!.createPattern(fencePatternCanvas, "repeat")!;
-    const tileSize = 32;
-
-    const elevatorHeight = (tileSize / 2) * 3 - wallSize;
-
-    const smallElevatorStartPosX = tileSize * 8;
-    const smallElevatorWidth = tileSize * 2;
-    const smallShaft = new ElevatorShaft(fencePattern, smallElevatorWidth, gameAreaSize, smallElevatorStartPosX);
-    const smallElevator = new Elevator(smallElevatorWidth, elevatorHeight, smallElevatorStartPosX, floorHeight * 1);
-
-    const largeElevatorStartPosX = tileSize * 11;
-    const largeElevatorWidth = tileSize * 3;
-    const largeShaft = new ElevatorShaft(fencePattern, largeElevatorWidth, gameAreaSize, largeElevatorStartPosX);
-    const largeElevator = new Elevator(largeElevatorWidth, elevatorHeight, largeElevatorStartPosX, floorHeight * 2);
-
-    const charContext = charCanvas.getContext("2d")!;
-    eraseColorInPlace(charCanvas, charContext);
-    colorizeInPlace(charCanvas, charContext, "#111111");
-
-    const char = new Sprite(charCanvas, 32, 64);
-    char.scale.x = char.scale.y = 3;
-    char.pivot.x = 0.5;
-    char.pivot.y = 1;
-    // char.scale.x = -3;
-
-    gameArea.children.push(smallShaft, smallElevator, largeShaft, largeElevator, char);
-    // this.elevators = [smallElevator, largeElevator];
-
+    const [frameCanvas] = game.assets["f"];
     const sidebar = new Sidebar(
       [
         isMobile ? canvasSize : sidebarSize,
@@ -101,8 +68,8 @@ export class GameScene extends BaseScene {
         +!isMobile * canvasSize,
         +isMobile * canvasSize,
       ],
-      (floorId) => {
-        logDebug(floorId);
+      (floorIndex) => {
+        controller.processButtonPress(floorIndex);
       },
       frameCanvas,
       floors,
