@@ -1,5 +1,4 @@
-import { colorizeInPlace, drawDottedGrid, eraseColorInPlace, getImageRegion } from "../canvas-utils";
-import { sine } from "../core/easing";
+import { colorizeInPlace, drawDottedGrid, eraseColorInPlace } from "../canvas-utils";
 import { MouseEvent } from "../core/event";
 import Container from "../display/container";
 import Sprite from "../display/sprite";
@@ -43,8 +42,8 @@ export const NUM_FLOORS = 8;
 export class GameScene extends BaseScene {
   sceneDimensions: GameSceneDimensions;
   private root: Container;
-  private elevators: [Elevator, Elevator];
-  constructor(private game: IGame) {
+  // private elevators: [Elevator, Elevator];
+  constructor(game: IGame) {
     document.querySelector<HTMLStyleElement>(".cc")!.style.imageRendering = "pixelated";
     super();
     const sceneDimensions = getGameSceneDimensions(NUM_FLOORS);
@@ -52,12 +51,14 @@ export class GameScene extends BaseScene {
     game.resize(sceneWidth, sceneHeight);
     this.sceneDimensions = sceneDimensions;
 
-    const [charImage, , frameImage, fencePatternImage] = game.assets;
+    const charCanvas = game.assets["c"];
+    const frameCanvas = game.assets["f"];
+    const fencePatternCanvas = game.assets["p"];
 
     this.root = new Container();
 
     const gameArea = new GameArea(gameAreaSize, floorHeight, wallSize, NUM_FLOORS, wallSize, wallSize);
-    const fencePattern = c.getContext("2d")!.createPattern(fencePatternImage, "repeat")!;
+    const fencePattern = c.getContext("2d")!.createPattern(fencePatternCanvas, "repeat")!;
     const tileSize = 32;
 
     const elevatorHeight = (tileSize / 2) * 3 - wallSize;
@@ -65,42 +66,31 @@ export class GameScene extends BaseScene {
     const smallElevatorStartPosX = tileSize * 8;
     const smallElevatorWidth = tileSize * 2;
     const smallShaft = new ElevatorShaft(fencePattern, smallElevatorWidth, gameAreaSize, smallElevatorStartPosX);
-    const smallElevator = new Elevator(
-      smallElevatorWidth,
-      elevatorHeight,
-      smallElevatorStartPosX,
-      floorHeight * 1,
-    );
+    const smallElevator = new Elevator(smallElevatorWidth, elevatorHeight, smallElevatorStartPosX, floorHeight * 1);
 
     const largeElevatorStartPosX = tileSize * 11;
     const largeElevatorWidth = tileSize * 3;
     const largeShaft = new ElevatorShaft(fencePattern, largeElevatorWidth, gameAreaSize, largeElevatorStartPosX);
-    const largeElevator = new Elevator(
-      largeElevatorWidth,
-      elevatorHeight,
-      largeElevatorStartPosX,
-      floorHeight * 2,
-    );
+    const largeElevator = new Elevator(largeElevatorWidth, elevatorHeight, largeElevatorStartPosX, floorHeight * 2);
 
-    const [charCanvas, charContext] = getImageRegion(charImage, 0, 0, 9, 9);
+    const charContext = charCanvas.getContext("2d")!;
     eraseColorInPlace(charCanvas, charContext);
     colorizeInPlace(charCanvas, charContext, "#111111");
-    // this.atlas = wrapCanvasFunc(scalePixelated, charCanvas, 3);
 
     const char = new Sprite(charCanvas, 32, 64);
     char.scale.x = char.scale.y = 3;
     char.pivot.x = 0.5;
     char.pivot.y = 1;
-    char.scale.x = -3;
+    // char.scale.x = -3;
 
     gameArea.children.push(smallShaft, smallElevator, largeShaft, largeElevator, char);
-    this.elevators = [smallElevator, largeElevator];
+    // this.elevators = [smallElevator, largeElevator];
 
     const sidebar = new Sidebar(
       (floorId) => {
         logDebug(floorId);
       },
-      frameImage,
+      frameCanvas,
       sidebarSize,
       canvasSize,
       +!isMobile * canvasSize,
@@ -125,31 +115,30 @@ export class GameScene extends BaseScene {
   onClick(mouseX: number, mouseY: number): void {
     this.root.dispatchEvent(new MouseEvent(mouseX, mouseY));
 
-    return;
+    // const { elevators, game, sceneDimensions } = this;
+    // const smallElevator = elevators[0];
 
-    const { elevators, game, sceneDimensions } = this;
-    const smallElevator = elevators[0];
     // open doors animation
-    game.tweener.tweenProperty(
-      30,
-      0,
-      32,
-      sine,
-      (v) => (smallElevator.doorWidth = v),
-      () => {
-        smallElevator.doorWidth = 32;
+    // game.tweener.tweenProperty(
+    //   30,
+    //   0,
+    //   32,
+    //   sine,
+    //   (v) => (smallElevator.doorWidth = v),
+    //   () => {
+    //     smallElevator.doorWidth = 32;
+    //   },
+    // );
 
-        // game.tweener.tweenProperty(
-        //   120,
-        //   smallElevator.position.y,
-        //   sceneDimensions.floorHeight * 0 + 16,
-        //   sine,
-        //   (v) => (smallElevator.position.y = v),
-        //   () => {
-        //     smallElevator.position.y = sceneDimensions.floorHeight * 0 + 16;
-        //   },
-        // );
-      },
-    );
+    // game.tweener.tweenProperty(
+    //   120,
+    //   smallElevator.position.y,
+    //   sceneDimensions.floorHeight * 0 + 16,
+    //   sine,
+    //   (v) => (smallElevator.position.y = v),
+    //   () => {
+    //     smallElevator.position.y = sceneDimensions.floorHeight * 0 + 16;
+    //   },
+    // );
   }
 }

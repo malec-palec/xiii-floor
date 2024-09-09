@@ -1,4 +1,4 @@
-import { IAssetsProvider } from "./assets";
+import { AssetMap, IAssetsProvider } from "./assets";
 import { ITweenerProvider, Tweener } from "./core/tweener";
 import { GameScene } from "./scenes/game-scene";
 import { IScene, ISceneManager, SceneName } from "./scenes/scene";
@@ -15,7 +15,7 @@ export class Game implements IGame {
 
   tweener = new Tweener();
 
-  constructor(public assets: HTMLImageElement[]) {
+  constructor(public assets: AssetMap) {
     this.context = c.getContext("2d")!;
     this.scene = new GameScene(this);
 

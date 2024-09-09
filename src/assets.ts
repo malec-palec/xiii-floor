@@ -1,26 +1,32 @@
+import manifest from "./assets/a.json";
+import ATLAS_URL from "./assets/a.png";
+import { getImageRegion } from "./canvas-utils";
+import { TILE_SIZE } from "./registry";
+
+type AssetManifestKeys = keyof typeof manifest;
+export type AssetMap = Record<AssetManifestKeys, HTMLCanvasElement>;
+
 export interface IAssetsProvider {
-  readonly assets: HTMLImageElement[];
+  readonly assets: AssetMap;
 }
 
-const imageUrls: Record<string, { default: string }> = import.meta.glob("./assets/*.png", { eager: true });
-
 const loadImage = (url: string): Promise<HTMLImageElement> =>
-  new Promise((resolve, reject) => {
+  new Promise((resolve /* , reject */) => {
     const image = new Image();
     image.src = url;
     image.onload = () => resolve(image);
-    image.onerror = reject;
+    // image.onerror = reject;
   });
 
-// export const enum AssetIndex {
-//   Atlas,
-//   Buttons,
-//   Frame,
-//   Pattern,
-//   Pattern2,
-// }
+export const loadAssets = async (): Promise<AssetMap> => {
+  const atlas = await loadImage(ATLAS_URL);
 
-export const loadAssets = (): Promise<HTMLImageElement[]> => {
-  return Promise.all(Object.values(imageUrls).map((module) => loadImage(module.default)));
+  const assets: { [key: string]: HTMLCanvasElement } = {};
+  let key: AssetManifestKeys;
+  for (key in manifest) {
+    const [x, y, w = TILE_SIZE, h = TILE_SIZE] = manifest[key];
+    const [canvas] = getImageRegion(atlas, x, y, w, h);
+    assets[key] = canvas;
+  }
+  return assets as AssetMap;
 };
-

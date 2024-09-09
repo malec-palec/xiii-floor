@@ -9,7 +9,7 @@ export class Sidebar extends Container {
   height: number;
   constructor(
     onButtonClick: (floorId: number) => void,
-    frameImage: HTMLImageElement,
+    frameImage: HTMLCanvasElement,
     sidebarSize: number,
     canvasSize: number,
     x = 0,
