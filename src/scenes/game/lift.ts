@@ -1,5 +1,4 @@
-import { IEventDispatcher } from "../../core/event";
-import { logDebug } from "../../utils";
+import { Event, IEventDispatcher } from "../../core/event";
 
 export type FloorData = {
   no: number;
@@ -7,12 +6,31 @@ export type FloorData = {
   people: number;
 };
 
+export type ElevatorData = {
+  capacity: number;
+  maxCapacity: number;
+  floorIndex: number;
+};
+
 type LiftModelParams = { numFloors: number; startFromFloorNo: number; unavailableFloorsIndices?: number[] };
 
-export class LiftModel {
-  floors: FloorData[] = [];
+export const enum LiftAction {
+  changeFloor,
+}
 
-  private eventDispatcher?: IEventDispatcher;
+export class LiftEvent extends Event {
+  constructor(public action: LiftAction) {
+    super();
+  }
+}
+
+export class LiftModel {
+  steps = 0;
+  readonly floors: FloorData[] = [];
+  readonly elevators: ElevatorData[] = [
+    { maxCapacity: 3, floorIndex: 2, capacity: 0 },
+    { maxCapacity: 5, floorIndex: 7 - 2, capacity: 0 },
+  ];
 
   constructor({ numFloors, startFromFloorNo, unavailableFloorsIndices = [] }: LiftModelParams) {
     for (let i = 0; i < numFloors; i++) {
@@ -21,18 +39,24 @@ export class LiftModel {
     this.floors[1].people = 7;
   }
 
-  setEventDispatcher(eventDispatcher: IEventDispatcher): void {
-    this.eventDispatcher = eventDispatcher;
-  }
-
   get numFloors(): number {
     return this.floors.length;
   }
 }
 
 export class LiftController {
-  constructor(private model: LiftModel) {}
-  processButtonPress(floorIndex: number): void {
-    logDebug("Button pressed:", floorIndex);
+  constructor(
+    private model: LiftModel,
+    private eventDispatcher: IEventDispatcher,
+  ) {}
+  processButtonPress(newFloorIndex: number): void {
+    const { model, eventDispatcher } = this;
+    const hasFloorChanged = newFloorIndex !== model.elevators[0].floorIndex;
+    if (hasFloorChanged) {
+      model.steps++;
+      model.elevators[0].floorIndex = newFloorIndex;
+      model.elevators[1].floorIndex = model.numFloors - 1 - newFloorIndex;
+      eventDispatcher.dispatchEvent(new LiftEvent(LiftAction.changeFloor));
+    }
   }
 }

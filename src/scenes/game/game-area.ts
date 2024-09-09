@@ -1,17 +1,21 @@
 import { AssetMap } from "../../assets";
 import { colorizeInPlace, eraseColorInPlace } from "../../canvas-utils";
+import { Event } from "../../core/event";
+import { Tweener } from "../../core/tweener";
 import Container from "../../display/container";
 import Sprite from "../../display/sprite";
-import { COLOR_BLACK, COLOR_WHITE } from "../../registry";
+import { COLOR_BLACK, COLOR_WHITE, TILE_SIZE } from "../../registry";
 import { GameSceneDimensions } from "../game-scene";
 import { Elevator, ElevatorShaft } from "./elevator";
-import { LiftModel } from "./lift";
+import { LiftAction, LiftEvent, LiftModel } from "./lift";
 
 export class GameArea extends Container {
   private chars: Sprite[][] = [];
+  private elevators: [Elevator, Elevator];
   constructor(
     private sceneDimensions: GameSceneDimensions,
     private model: LiftModel,
+    tweener: Tweener,
     assets: AssetMap,
   ) {
     const { gameAreaSize, floorHeight, wallSize } = sceneDimensions;
@@ -20,19 +24,32 @@ export class GameArea extends Container {
     const [fencePatternCanvas] = assets["p"];
 
     const fencePattern = c.getContext("2d")!.createPattern(fencePatternCanvas, "repeat")!;
-    const tileSize = 32;
 
-    const elevatorHeight = (tileSize / 2) * 3 - wallSize;
+    const bigTileSize = TILE_SIZE * 2;
+    const elevatorHeight = TILE_SIZE * 3 - wallSize;
 
-    const smallElevatorStartPosX = tileSize * 8;
-    const smallElevatorWidth = tileSize * 2;
+    const smallElevatorStartPosX = bigTileSize * 8;
+    const smallElevatorWidth = bigTileSize * 2;
     const smallShaft = new ElevatorShaft(fencePattern, smallElevatorWidth, gameAreaSize, smallElevatorStartPosX);
-    const smallElevator = new Elevator(smallElevatorWidth, elevatorHeight, smallElevatorStartPosX, floorHeight * 1);
+    const smallElevator = new Elevator(
+      tweener,
+      smallElevatorWidth,
+      elevatorHeight,
+      smallElevatorStartPosX,
+      gameAreaSize - floorHeight * model.elevators[0].floorIndex,
+    );
 
-    const largeElevatorStartPosX = tileSize * 11;
-    const largeElevatorWidth = tileSize * 3;
+    const largeElevatorStartPosX = bigTileSize * 11;
+    const largeElevatorWidth = bigTileSize * 3;
     const largeShaft = new ElevatorShaft(fencePattern, largeElevatorWidth, gameAreaSize, largeElevatorStartPosX);
-    const largeElevator = new Elevator(largeElevatorWidth, elevatorHeight, largeElevatorStartPosX, floorHeight * 2);
+    const largeElevator = new Elevator(
+      tweener,
+      largeElevatorWidth,
+      elevatorHeight,
+      largeElevatorStartPosX,
+      gameAreaSize - floorHeight * model.elevators[1].floorIndex,
+    );
+    this.elevators = [smallElevator, largeElevator];
 
     this.children.push(smallShaft, smallElevator, largeShaft, largeElevator);
 
@@ -71,30 +88,23 @@ export class GameArea extends Container {
       context.fillRect(0, floorHeight * i, gameAreaSize, wallSize);
     }
   }
+
+  protected handleEvent(event: Event): void {
+    const { sceneDimensions, model, elevators } = this;
+    if (event instanceof LiftEvent) {
+      switch (event.action) {
+        case LiftAction.changeFloor:
+          for (let i = 0; i < elevators.length; i++) {
+            const elevator = elevators[i];
+            const endY = sceneDimensions.gameAreaSize - sceneDimensions.floorHeight * model.elevators[i].floorIndex;
+            elevator
+              .close()
+              .then(() => elevator.moveTo(endY, (Math.abs(endY - elevator.position.y) / sceneDimensions.floorHeight) * 20))
+              .then(() => elevator.open());
+            // enable controls
+          }
+          break;
+      }
+    }
+  }
 }
-
-// const { elevators, game, sceneDimensions } = this;
-// const smallElevator = elevators[0];
-
-// open doors animation
-// game.tweener.tweenProperty(
-//   30,
-//   0,
-//   32,
-//   sine,
-//   (v) => (smallElevator.doorWidth = v),
-//   () => {
-//     smallElevator.doorWidth = 32;
-//   },
-// );
-
-// game.tweener.tweenProperty(
-//   120,
-//   smallElevator.position.y,
-//   sceneDimensions.floorHeight * 0 + 16,
-//   sine,
-//   (v) => (smallElevator.position.y = v),
-//   () => {
-//     smallElevator.position.y = sceneDimensions.floorHeight * 0 + 16;
-//   },
-// );
