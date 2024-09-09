@@ -36,9 +36,8 @@ export const getGameSceneDimensions = (numFloors: number): GameSceneDimensions =
 };
 
 export class GameScene extends BaseScene {
-  sceneDimensions: GameSceneDimensions;
+  private sceneDimensions: GameSceneDimensions;
   private root: Container;
-  // private elevators: [Elevator, Elevator];
   constructor(game: IGame) {
     document.querySelector<HTMLStyleElement>(".cc")!.style.imageRendering = "pixelated";
     super();
@@ -48,16 +47,10 @@ export class GameScene extends BaseScene {
     const controller = new LiftController(model);
     model.setEventDispatcher(root);
 
-    const { floors } = model;
-    for (let i = 0; i < floors.length; i++) {
-      // const floor = floors[i];
-    }
-
     const sceneDimensions = getGameSceneDimensions(model.numFloors);
     const { canvasSize, sidebarSize, sceneWidth, sceneHeight} = sceneDimensions;
     game.resize(sceneWidth, sceneHeight);
-    this.sceneDimensions = sceneDimensions;
-
+    
     const gameArea = new GameArea(sceneDimensions, model, game.assets);
 
     const [frameCanvas] = game.assets["f"];
@@ -72,11 +65,12 @@ export class GameScene extends BaseScene {
         controller.processButtonPress(floorIndex);
       },
       frameCanvas,
-      floors,
+      model.floors,
     );
     root.children.push(gameArea, sidebar);
 
     this.root = root;
+    this.sceneDimensions = sceneDimensions;
   }
   update(dt: number): void {
     this.root.update(dt);
@@ -95,29 +89,3 @@ export class GameScene extends BaseScene {
     this.root.dispatchEvent(new MouseEvent(mouseX, mouseY));
   }
 }
-
-// const { elevators, game, sceneDimensions } = this;
-// const smallElevator = elevators[0];
-
-// open doors animation
-// game.tweener.tweenProperty(
-//   30,
-//   0,
-//   32,
-//   sine,
-//   (v) => (smallElevator.doorWidth = v),
-//   () => {
-//     smallElevator.doorWidth = 32;
-//   },
-// );
-
-// game.tweener.tweenProperty(
-//   120,
-//   smallElevator.position.y,
-//   sceneDimensions.floorHeight * 0 + 16,
-//   sine,
-//   (v) => (smallElevator.position.y = v),
-//   () => {
-//     smallElevator.position.y = sceneDimensions.floorHeight * 0 + 16;
-//   },
-// );

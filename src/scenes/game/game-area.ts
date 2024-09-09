@@ -8,6 +8,7 @@ import { Elevator, ElevatorShaft } from "./elevator";
 import { LiftModel } from "./lift";
 
 export class GameArea extends Container {
+  private chars: Sprite[][] = [];
   constructor(
     private sceneDimensions: GameSceneDimensions,
     private model: LiftModel,
@@ -33,17 +34,28 @@ export class GameArea extends Container {
     const largeShaft = new ElevatorShaft(fencePattern, largeElevatorWidth, gameAreaSize, largeElevatorStartPosX);
     const largeElevator = new Elevator(largeElevatorWidth, elevatorHeight, largeElevatorStartPosX, floorHeight * 2);
 
+    this.children.push(smallShaft, smallElevator, largeShaft, largeElevator);
+
     const [charCanvas, charContext] = assets["c"];
     eraseColorInPlace(charCanvas, charContext);
     colorizeInPlace(charCanvas, charContext, "#111111");
 
-    const char = new Sprite(charCanvas, 32, 64);
-    char.scale.x = char.scale.y = 3;
-    char.pivot.x = 0.5;
-    char.pivot.y = 1;
-    // char.scale.x = -3;
-
-    this.children.push(smallShaft, smallElevator, largeShaft, largeElevator, char);
+    const { floors } = model;
+    for (let i = 0; i < floors.length; i++) {
+      const floor = floors[i];
+      if (floor.people > 0) {
+        const floorChars: Sprite[] = [];
+        for (let j = 0; j < floor.people; j++) {
+          const char = new Sprite(charCanvas, smallElevatorStartPosX - (j + 1) * 32, gameAreaSize - floorHeight * i);
+          char.scale.x = char.scale.y = 3;
+          char.pivot.x = 0.5;
+          char.pivot.y = 1;
+          floorChars.push(char);
+        }
+        this.children.push(...floorChars);
+        this.chars[i] = floorChars;
+      }
+    }
   }
   draw(context: CanvasRenderingContext2D): void {
     const { sceneDimensions, model } = this;
@@ -60,3 +72,29 @@ export class GameArea extends Container {
     }
   }
 }
+
+// const { elevators, game, sceneDimensions } = this;
+// const smallElevator = elevators[0];
+
+// open doors animation
+// game.tweener.tweenProperty(
+//   30,
+//   0,
+//   32,
+//   sine,
+//   (v) => (smallElevator.doorWidth = v),
+//   () => {
+//     smallElevator.doorWidth = 32;
+//   },
+// );
+
+// game.tweener.tweenProperty(
+//   120,
+//   smallElevator.position.y,
+//   sceneDimensions.floorHeight * 0 + 16,
+//   sine,
+//   (v) => (smallElevator.position.y = v),
+//   () => {
+//     smallElevator.position.y = sceneDimensions.floorHeight * 0 + 16;
+//   },
+// );

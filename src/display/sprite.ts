@@ -1,7 +1,7 @@
-import { DisplayObject } from "./display-object";
+import { createPoint, DisplayObject } from "./display-object";
 
 export default class Sprite extends DisplayObject {
-  pivot = { x: 0, y: 0 };
+  pivot = createPoint();
   constructor(
     public image: DrawImageSource,
     x = 0,
