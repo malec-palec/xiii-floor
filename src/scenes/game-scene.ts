@@ -36,12 +36,15 @@ export const getGameSceneDimensions = (numFloors: number): GameSceneDimensions =
 };
 
 export class GameScene extends BaseScene {
-  private sceneDimensions: GameSceneDimensions;
-  private root: Container;
-  constructor(game: IGame) {
+  private sceneDimensions!: GameSceneDimensions;
+  private root!: Container;
+  constructor(private game: IGame) {
     document.querySelector<HTMLStyleElement>(".cc")!.style.imageRendering = "pixelated";
     super();
-
+    this.reset();
+  }
+  reset(): void {
+    const { game } = this;
     const root = new Container();
     const model = new LiftModel({
       numFloors: 8,
@@ -55,7 +58,6 @@ export class GameScene extends BaseScene {
         1: 7,
       },
     });
-
     const controller = new LiftController(model, root);
 
     const sceneDimensions = getGameSceneDimensions(model.numFloors);
@@ -75,6 +77,7 @@ export class GameScene extends BaseScene {
       frameCanvas,
       model,
       controller,
+      this.reset.bind(this)
     );
     root.children.push(gameArea, sidebar);
 

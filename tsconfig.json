@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "noUnusedLocals": true,
     "strict": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",

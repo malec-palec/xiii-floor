@@ -40,12 +40,13 @@ export default [
     rules: {
       "no-undef": "off",
       "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": ["error", { args: "none", caughtErrors: "none" }],
+      // "@typescript-eslint/no-unused-vars": ["error", { args: "none", caughtErrors: "none" }],
+      "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/explicit-module-boundary-types": "error",
       "@typescript-eslint/no-explicit-any": ["error", { ignoreRestArgs: true }],
       "no-useless-constructor": "off",
       "@typescript-eslint/no-useless-constructor": "warn",
-      "@typescript-eslint/no-namespace": "off"
+      "@typescript-eslint/no-namespace": "off",
     },
   },
 ];

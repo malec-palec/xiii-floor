@@ -92,12 +92,14 @@ export class LiftController {
     }
     eventDispatcher.dispatchEvent(new LiftEvent({ action: LiftAction.changeFloor, isOverweight }));
   }
-  onLiftAnimationComplete(): void {
+  checkOverweight(): boolean {
     // check overweight
     const { model } = this;
     if (model.elevators[1].capacity - model.elevators[0].capacity >= 5) {
       this.processButtonPress(model.elevators[0].floorIndex + 1, true);
+      return true;
     }
+    return false;
   }
   enableInput(value: boolean): void {
     this.model.isInputEnabled = value;

@@ -177,8 +177,7 @@ export class GameArea extends Container {
               return this.moveElevator(elevator, elevatorModel, people, data.isOverweight);
             }),
           );
-          controller.onLiftAnimationComplete();
-          controller.enableInput(true);
+          if (!controller.checkOverweight()) controller.enableInput(true);
           break;
       }
     }

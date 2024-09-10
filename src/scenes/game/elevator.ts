@@ -5,7 +5,6 @@ import Sprite from "../../display/sprite";
 import { COLOR_BLACK, COLOR_WHITE } from "../../registry";
 
 export class ElevatorShaft extends DisplayObject {
-  private chars: Sprite[] = [];
   private borderSize = 2;
   constructor(
     private fencePattern: CanvasPattern,
