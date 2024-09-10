@@ -1,9 +1,11 @@
 import { sine } from "../../core/easing";
 import { Tweener } from "../../core/tweener";
 import { DisplayObject } from "../../display/display-object";
+import Sprite from "../../display/sprite";
 import { COLOR_BLACK, COLOR_WHITE } from "../../registry";
 
 export class ElevatorShaft extends DisplayObject {
+  private chars: Sprite[] = [];
   private borderSize = 2;
   constructor(
     private fencePattern: CanvasPattern,
@@ -26,15 +28,13 @@ export class ElevatorShaft extends DisplayObject {
 }
 
 export class Elevator extends DisplayObject {
+  readonly chars: Sprite[] = [];
   private borderHeight = 2;
-  doorWidth: number = 0;
+  private doorWidth: number = 0;
   // TODO: make tweener global
   constructor(
+    [width, height, x = 0, y = 0]: [number, number, number, number],
     private tweener: Tweener,
-    width: number,
-    height: number,
-    x = 0,
-    y = 0,
   ) {
     super(width, height, x, y);
   }
@@ -52,8 +52,9 @@ export class Elevator extends DisplayObject {
     context.fillRect(width - doorWidth, -height, doorWidth, height);
   }
   open(): Promise<void> {
-    const { tweener, width } = this;
+    const { tweener, width, chars } = this;
     return new Promise((resolve) => {
+      chars.forEach((char) => (char.isVisible = true));
       tweener.tweenProperty(
         30,
         width / 2,
@@ -68,7 +69,7 @@ export class Elevator extends DisplayObject {
     });
   }
   moveTo(targetY: number, duration: number): Promise<void> {
-    const { tweener, position } = this;
+    const { tweener, position, chars } = this;
     return new Promise((resolve) => {
       tweener.tweenProperty(
         duration,
@@ -78,13 +79,14 @@ export class Elevator extends DisplayObject {
         (py) => (position.y = py), // | 0
         () => {
           position.y = targetY;
+          chars.forEach((char) => (char.position.y = targetY));
           resolve();
         },
       );
     });
   }
   close(): Promise<void> {
-    const { tweener, width } = this;
+    const { tweener, width, chars } = this;
     return new Promise((resolve) => {
       tweener.tweenProperty(
         30,
@@ -94,9 +96,14 @@ export class Elevator extends DisplayObject {
         (v) => (this.doorWidth = v),
         () => {
           this.doorWidth = width / 2;
+          chars.forEach((char) => (char.isVisible = false));
           resolve();
         },
       );
     });
+  }
+  getCharPlace(index: number, capacity: number): number {
+    const { position, width } = this;
+    return position.x + width - (index + 1) * (width / (capacity + 1));
   }
 }

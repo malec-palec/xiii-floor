@@ -47,10 +47,10 @@ export class GameScene extends BaseScene {
     const controller = new LiftController(model, root);
 
     const sceneDimensions = getGameSceneDimensions(model.numFloors);
-    const { canvasSize, sidebarSize, sceneWidth, sceneHeight} = sceneDimensions;
+    const { canvasSize, sidebarSize, sceneWidth, sceneHeight } = sceneDimensions;
     game.resize(sceneWidth, sceneHeight);
-    
-    const gameArea = new GameArea(sceneDimensions, model, game.tweener, game.assets);
+
+    const gameArea = new GameArea(sceneDimensions, model, controller, game.tweener, game.assets);
 
     const [frameCanvas] = game.assets["f"];
     const sidebar = new Sidebar(
@@ -60,11 +60,9 @@ export class GameScene extends BaseScene {
         +!isMobile * canvasSize,
         +isMobile * canvasSize,
       ],
-      (floorIndex) => {
-        controller.processButtonPress(floorIndex);
-      },
       frameCanvas,
-      model.floors,
+      model,
+      controller,
     );
     root.children.push(gameArea, sidebar);
 
@@ -82,7 +80,7 @@ export class GameScene extends BaseScene {
 
     this.root.draw(context);
 
-    // drawDottedGrid(context, wallSize, wallSize, gameAreaSize, gameAreaSize, 32);
+    drawDottedGrid(context, wallSize, wallSize, gameAreaSize, gameAreaSize, 32);
   }
   onClick(mouseX: number, mouseY: number): void {
     this.root.dispatchEvent(new MouseEvent(mouseX, mouseY));

@@ -3,20 +3,22 @@ import { Button } from "../../display/button";
 import Container from "../../display/container";
 import { FrameShape } from "../../display/shape";
 import { isMobile } from "../../registry";
-import { FloorData } from "./lift";
+import { LiftController, LiftModel } from "./lift";
 
 export class Sidebar extends Container {
   width: number;
   height: number;
   constructor(
     [width, height, x = 0, y = 0]: [number, number, number, number],
-    onButtonClick: (floorIndex: number) => void,
     frameImage: HTMLCanvasElement,
-    floors: FloorData[],
+    model: LiftModel,
+    controller: LiftController,
   ) {
     super(x, y);
     this.width = width;
     this.height = height;
+
+    const { floors } = model;
 
     const frame = new FrameShape(frameImage, width, height);
 
@@ -31,7 +33,9 @@ export class Sidebar extends Container {
         i,
         floor.no === 13 ? "" : String(floor.no),
         !floor.isUnavailable,
-        onButtonClick,
+        (floorIndex) => {
+          if (model.isInputEnabled) controller.processButtonPress(floorIndex);
+        },
       );
       buttons[i] = button;
     }

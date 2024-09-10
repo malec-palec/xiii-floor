@@ -4,10 +4,11 @@ import { Event } from "../../core/event";
 import { Tweener } from "../../core/tweener";
 import Container from "../../display/container";
 import Sprite from "../../display/sprite";
-import { COLOR_BLACK, COLOR_WHITE, TILE_SIZE } from "../../registry";
+import { BIG_TILE_SIZE, COLOR_BLACK, COLOR_WHITE, TILE_SIZE } from "../../registry";
+import { delay } from "../../utils";
 import { GameSceneDimensions } from "../game-scene";
 import { Elevator, ElevatorShaft } from "./elevator";
-import { LiftAction, LiftEvent, LiftModel } from "./lift";
+import { ElevatorData, LiftAction, LiftController, LiftEvent, LiftModel } from "./lift";
 
 export class GameArea extends Container {
   private chars: Sprite[][] = [];
@@ -15,6 +16,7 @@ export class GameArea extends Container {
   constructor(
     private sceneDimensions: GameSceneDimensions,
     private model: LiftModel,
+    private controller: LiftController,
     tweener: Tweener,
     assets: AssetMap,
   ) {
@@ -31,23 +33,29 @@ export class GameArea extends Container {
     const smallElevatorStartPosX = bigTileSize * 8;
     const smallElevatorWidth = bigTileSize * 2;
     const smallShaft = new ElevatorShaft(fencePattern, smallElevatorWidth, gameAreaSize, smallElevatorStartPosX);
+    const smallElevatorModel = model.elevators[0];
     const smallElevator = new Elevator(
+      [
+        smallElevatorWidth,
+        elevatorHeight,
+        smallElevatorStartPosX,
+        gameAreaSize - floorHeight * smallElevatorModel.floorIndex,
+      ],
       tweener,
-      smallElevatorWidth,
-      elevatorHeight,
-      smallElevatorStartPosX,
-      gameAreaSize - floorHeight * model.elevators[0].floorIndex,
     );
 
     const largeElevatorStartPosX = bigTileSize * 11;
     const largeElevatorWidth = bigTileSize * 3;
     const largeShaft = new ElevatorShaft(fencePattern, largeElevatorWidth, gameAreaSize, largeElevatorStartPosX);
+    const largeElevatorModel = model.elevators[1];
     const largeElevator = new Elevator(
+      [
+        largeElevatorWidth,
+        elevatorHeight,
+        largeElevatorStartPosX,
+        gameAreaSize - floorHeight * largeElevatorModel.floorIndex,
+      ],
       tweener,
-      largeElevatorWidth,
-      elevatorHeight,
-      largeElevatorStartPosX,
-      gameAreaSize - floorHeight * model.elevators[1].floorIndex,
     );
     this.elevators = [smallElevator, largeElevator];
 
@@ -60,18 +68,22 @@ export class GameArea extends Container {
     const { floors } = model;
     for (let i = 0; i < floors.length; i++) {
       const floor = floors[i];
+      const floorChars: Sprite[] = [];
       if (floor.people > 0) {
-        const floorChars: Sprite[] = [];
         for (let j = 0; j < floor.people; j++) {
-          const char = new Sprite(charCanvas, smallElevatorStartPosX - (j + 1) * 32, gameAreaSize - floorHeight * i);
+          const char = new Sprite(
+            charCanvas,
+            smallElevatorStartPosX - (j + 1) * BIG_TILE_SIZE,
+            gameAreaSize - floorHeight * i,
+          );
           char.scale.x = char.scale.y = 3;
           char.pivot.x = 0.5;
           char.pivot.y = 1;
           floorChars.push(char);
         }
         this.children.push(...floorChars);
-        this.chars[i] = floorChars;
       }
+      this.chars[i] = floorChars;
     }
   }
   draw(context: CanvasRenderingContext2D): void {
@@ -86,23 +98,77 @@ export class GameArea extends Container {
     context.fillStyle = COLOR_BLACK;
     for (let i = 0; i <= model.numFloors; i++) {
       context.fillRect(0, floorHeight * i, gameAreaSize, wallSize);
+
+      if (i < model.numFloors) {
+        context.fillStyle = "black";
+        context.font = "28px Arial";
+        context.fillText(String(model.floors[i].no), BIG_TILE_SIZE * 15, gameAreaSize - floorHeight * i);
+      }
     }
   }
 
-  protected handleEvent(event: Event): void {
-    const { sceneDimensions, model, elevators } = this;
+  async moveElevator(elevator: Elevator, elevatorModel: ElevatorData, numPeople: number): Promise<void> {
+    const { sceneDimensions } = this;
+
+    await elevator.close();
+
+    const endY = sceneDimensions.gameAreaSize - sceneDimensions.floorHeight * elevatorModel.floorIndex;
+    await elevator.moveTo(endY, (Math.abs(endY - elevator.position.y) / sceneDimensions.floorHeight) * 20);
+
+    await elevator.open();
+
+    const { floorIndex } = elevatorModel;
+    const floorChars = this.chars[floorIndex];
+    let delta = floorChars.length - numPeople;
+
+    const { chars } = elevator;
+    if (delta > 0) {
+      // go in
+      if (chars.length > 0) {
+        for (let i = 0; i < chars.length; i++) {
+          chars[i].position.x = elevator.getCharPlace(i, elevatorModel.capacity);
+        }
+      }
+      while (delta > 0) {
+        const char = floorChars.shift()!;
+        char.position.x = elevator.getCharPlace(chars.length, elevatorModel.capacity);
+        char.scale.x *= -1;
+        chars.push(char);
+        delta--;
+      }
+    } else {
+      // go out
+      while (delta < 0) {
+        const char = chars.pop()!;
+        char.position.x = this.elevators[0].position.x - (floorChars.length + 1) * BIG_TILE_SIZE;
+        char.scale.x *= -1;
+        floorChars.push(char);
+        delta++;
+      }
+    }
+
+    await delay(200);
+
+    for (let i = 0; i < floorChars.length; i++) {
+      const char = floorChars[i];
+      char.position.x = this.elevators[0].position.x - (i + 1) * BIG_TILE_SIZE;
+    }
+  }
+
+  protected async handleEvent(event: Event): Promise<void> {
+    const { model, controller, elevators } = this;
     if (event instanceof LiftEvent) {
       switch (event.action) {
         case LiftAction.changeFloor:
-          for (let i = 0; i < elevators.length; i++) {
-            const elevator = elevators[i];
-            const endY = sceneDimensions.gameAreaSize - sceneDimensions.floorHeight * model.elevators[i].floorIndex;
-            elevator
-              .close()
-              .then(() => elevator.moveTo(endY, (Math.abs(endY - elevator.position.y) / sceneDimensions.floorHeight) * 20))
-              .then(() => elevator.open());
-            // enable controls
-          }
+          controller.enableInput(false);
+          await Promise.all(
+            elevators.map((elevator, i) => {
+              const elevatorModel = model.elevators[i];
+              const { people } = model.floors[elevatorModel.floorIndex];
+              return this.moveElevator(elevator, elevatorModel, people);
+            }),
+          );
+          controller.enableInput(true);
           break;
       }
     }
