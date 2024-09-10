@@ -43,7 +43,19 @@ export class GameScene extends BaseScene {
     super();
 
     const root = new Container();
-    const model = new LiftModel({ numFloors: 8, startFromFloorNo: 9, unavailableFloorsIndices: [3, 4, 5] });
+    const model = new LiftModel({
+      numFloors: 8,
+      startFromFloorNo: 9,
+      unavailableFloorsIndices: [3, 4, 5],
+      elevators: [
+        { maxCapacity: 3, floorIndex: 2, capacity: 0 },
+        { maxCapacity: 5, floorIndex: 7 - 2, capacity: 0 },
+      ],
+      peoplePerFloor: {
+        1: 7,
+      },
+    });
+
     const controller = new LiftController(model, root);
 
     const sceneDimensions = getGameSceneDimensions(model.numFloors);
@@ -80,7 +92,7 @@ export class GameScene extends BaseScene {
 
     this.root.draw(context);
 
-    drawDottedGrid(context, wallSize, wallSize, gameAreaSize, gameAreaSize, 32);
+    // drawDottedGrid(context, wallSize, wallSize, gameAreaSize, gameAreaSize, 32);
   }
   onClick(mouseX: number, mouseY: number): void {
     this.root.dispatchEvent(new MouseEvent(mouseX, mouseY));

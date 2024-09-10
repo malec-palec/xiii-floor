@@ -107,15 +107,23 @@ export class GameArea extends Container {
     }
   }
 
-  async moveElevator(elevator: Elevator, elevatorModel: ElevatorData, numPeople: number): Promise<void> {
+  async moveElevator(
+    elevator: Elevator,
+    elevatorModel: ElevatorData,
+    numPeople: number,
+    isOverweight: boolean,
+  ): Promise<void> {
     const { sceneDimensions } = this;
 
-    await elevator.close();
+    if (!isOverweight) await elevator.close();
 
     const endY = sceneDimensions.gameAreaSize - sceneDimensions.floorHeight * elevatorModel.floorIndex;
     await elevator.moveTo(endY, (Math.abs(endY - elevator.position.y) / sceneDimensions.floorHeight) * 20);
 
-    await elevator.open();
+    if (!isOverweight) await elevator.open();
+
+    // Temp
+    if (isOverweight) await delay(200);
 
     const { floorIndex } = elevatorModel;
     const floorChars = this.chars[floorIndex];
@@ -158,16 +166,18 @@ export class GameArea extends Container {
   protected async handleEvent(event: Event): Promise<void> {
     const { model, controller, elevators } = this;
     if (event instanceof LiftEvent) {
-      switch (event.action) {
+      const { data } = event;
+      switch (data.action) {
         case LiftAction.changeFloor:
           controller.enableInput(false);
           await Promise.all(
             elevators.map((elevator, i) => {
               const elevatorModel = model.elevators[i];
               const { people } = model.floors[elevatorModel.floorIndex];
-              return this.moveElevator(elevator, elevatorModel, people);
+              return this.moveElevator(elevator, elevatorModel, people, data.isOverweight);
             }),
           );
+          controller.onLiftAnimationComplete();
           controller.enableInput(true);
           break;
       }

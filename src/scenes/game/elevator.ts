@@ -76,7 +76,10 @@ export class Elevator extends DisplayObject {
         position.y,
         targetY,
         sine,
-        (py) => (position.y = py), // | 0
+        (py) => {
+          position.y = py;
+          chars.forEach((char) => (char.position.y = py));
+        },
         () => {
           position.y = targetY;
           chars.forEach((char) => (char.position.y = targetY));
