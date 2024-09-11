@@ -10,7 +10,6 @@ export default class Sprite extends DisplayObject {
   ) {
     super(image.width, image.height, x, y);
   }
-  update(dt: number): void {}
   draw(context: CanvasRenderingContext2D): void {
     if (!this.isVisible) return;
     const { image, pivot } = this;

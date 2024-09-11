@@ -1,9 +1,10 @@
 import { AssetMap } from "../../assets";
-import { colorizeInPlace, eraseColorInPlace, getImageRegion } from "../../canvas-utils";
+import { colorizeInPlace, eraseColorInPlace } from "../../canvas-utils";
 import { Event } from "../../core/event";
 import { Tweener } from "../../core/tweener";
 import Container from "../../display/container";
 import Sprite from "../../display/sprite";
+import SpriteSheet from "../../display/sprite-sheet";
 import { BIG_TILE_SIZE, COLOR_BLACK, COLOR_WHITE, TILE_SIZE } from "../../registry";
 import { delay } from "../../utils";
 import { GameSceneDimensions } from "../game-scene";
@@ -86,35 +87,30 @@ export class GameArea extends Container {
       this.chars[i] = floorChars;
     }
 
-    const numbers: HTMLCanvasElement[] = [];
-    const [numbersCanvas] = assets["n"];
-    const butRows = numbersCanvas.width / 4;
-    const butCols = numbersCanvas.height / 5;
-    let x: number, y: number, i: number;
-    for (y = 0; y < butCols; y++) {
-      for (x = 0; x < butRows; x++) {
-        i = x + y * butRows;
-        const [numCanvas, numContext] = getImageRegion(numbersCanvas, x * 4, y * 5, 4, 5);
-        eraseColorInPlace(numCanvas, numContext);
-        colorizeInPlace(numCanvas, numContext, COLOR_BLACK);
-        numbers[i] = numCanvas;
-      }
-    }
+    const [numbersCanvas, numbersContext] = assets["n"];
+    eraseColorInPlace(numbersCanvas, numbersContext);
+    colorizeInPlace(numbersCanvas, numbersContext, COLOR_BLACK);
 
-    const offset = 2;
+    // TODO: make counter widget
+    const offset = 4;
+    const scale = 4;
     for (let i = 0; i < model.numFloors; i++) {
       const numStr = String(model.floors[i].no);
       const first = numStr.length === 2 ? parseInt(numStr[0]) : 0;
       const second = numStr.length === 2 ? parseInt(numStr[1]) : parseInt(numStr[0]);
 
-      const firstNum = new Sprite(
-        numbers[first],
-        BIG_TILE_SIZE * 15 + offset,
-        gameAreaSize - (i + 1) * floorHeight + 8 + offset,
+      const firstNum = new SpriteSheet(
+        [3, 5, BIG_TILE_SIZE * 15, gameAreaSize - (i + 1) * floorHeight + wallSize + offset],
+        numbersCanvas,
+        first,
       );
-      firstNum.scale.x = firstNum.scale.y = 4;
-      const secondNum = new Sprite(numbers[second], firstNum.position.x + firstNum.width * 4, firstNum.position.y);
-      secondNum.scale.x = secondNum.scale.y = 4;
+      firstNum.scale.x = firstNum.scale.y = scale;
+      const secondNum = new SpriteSheet(
+        [3, 5, firstNum.position.x + firstNum.width * scale + offset, firstNum.position.y],
+        numbersCanvas,
+        second,
+      );
+      secondNum.scale.x = secondNum.scale.y = scale;
       this.children.push(firstNum, secondNum);
     }
   }
