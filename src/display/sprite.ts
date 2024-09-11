@@ -2,7 +2,6 @@ import { createPoint, DisplayObject } from "./display-object";
 
 export default class Sprite extends DisplayObject {
   pivot = createPoint();
-  isVisible = true;
   constructor(
     public image: DrawImageSource,
     x = 0,

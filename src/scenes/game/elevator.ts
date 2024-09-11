@@ -1,7 +1,7 @@
 import { sine } from "../../core/easing";
 import { Tweener } from "../../core/tweener";
 import { DisplayObject } from "../../display/display-object";
-import Sprite from "../../display/sprite";
+import MovieClip from "../../display/movie-clip";
 import { COLOR_BLACK, COLOR_WHITE } from "../../registry";
 
 export class ElevatorShaft extends DisplayObject {
@@ -27,7 +27,7 @@ export class ElevatorShaft extends DisplayObject {
 }
 
 export class Elevator extends DisplayObject {
-  readonly chars: Sprite[] = [];
+  readonly chars: MovieClip[] = [];
   private borderHeight = 2;
   private doorWidth: number = 0;
   // TODO: make tweener global

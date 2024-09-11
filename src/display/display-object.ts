@@ -8,6 +8,7 @@ export type Point = {
 export const createPoint = (x = 0, y = x): Point => ({ x, y });
 
 export interface IDisplayObject extends IEventDispatcher {
+  isVisible: boolean;
   position: Point;
   scale: Point;
   update(dt: number): void;
@@ -15,6 +16,7 @@ export interface IDisplayObject extends IEventDispatcher {
 }
 
 export class DisplayObject implements IDisplayObject {
+  isVisible = true;
   position: Point;
   scale = createPoint(1);
   constructor(

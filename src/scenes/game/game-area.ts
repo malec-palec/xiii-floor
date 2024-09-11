@@ -4,7 +4,7 @@ import { linear } from "../../core/easing";
 import { Event } from "../../core/event";
 import { Tweener } from "../../core/tweener";
 import Container from "../../display/container";
-import Sprite from "../../display/sprite";
+import MovieClip from "../../display/movie-clip";
 import SpriteSheet from "../../display/sprite-sheet";
 import { BIG_TILE_SIZE, COLOR_BLACK, COLOR_WHITE, TILE_SIZE } from "../../registry";
 import { delay } from "../../utils";
@@ -13,7 +13,7 @@ import { Elevator, ElevatorShaft } from "./elevator";
 import { ElevatorData, LiftAction, LiftController, LiftEvent, LiftModel } from "./lift";
 
 export class GameArea extends Container {
-  private chars: Sprite[][] = [];
+  private chars: MovieClip[][] = [];
   private elevators: [Elevator, Elevator];
   constructor(
     private sceneDimensions: GameSceneDimensions,
@@ -63,25 +63,25 @@ export class GameArea extends Container {
 
     this.children.push(smallShaft, smallElevator, largeShaft, largeElevator);
 
-    const [charCanvas, charContext] = assets["c"];
-    eraseColorInPlace(charCanvas, charContext);
-    colorizeInPlace(charCanvas, charContext, COLOR_BLACK);
+    const [charAnimCanvas, charAnimContext] = assets["ca"];
+    eraseColorInPlace(charAnimCanvas, charAnimContext);
+    colorizeInPlace(charAnimCanvas, charAnimContext, COLOR_BLACK);
 
     const { floors } = model;
     for (let i = 0; i < floors.length; i++) {
       const floor = floors[i];
-      const floorChars: Sprite[] = [];
+      const floorChars: MovieClip[] = [];
       if (floor.people > 0) {
         for (let j = 0; j < floor.people; j++) {
-          const char = new Sprite(
-            charCanvas,
-            smallElevatorStartPosX - (j + 1) * BIG_TILE_SIZE,
-            gameAreaSize - floorHeight * i,
+          const charAnim = new MovieClip(
+            [9, 9, smallElevatorStartPosX - (j + 1) * BIG_TILE_SIZE, gameAreaSize - floorHeight * i],
+            charAnimCanvas,
           );
-          char.scale.x = char.scale.y = 3;
-          char.pivot.x = 0.5;
-          char.pivot.y = 1;
-          floorChars.push(char);
+          charAnim.frames = [0, 1, 0, 2];
+          charAnim.scale.x = charAnim.scale.y = 3;
+          charAnim.pivot.x = 0.5;
+          charAnim.pivot.y = 1;
+          floorChars.push(charAnim);
         }
         this.children.push(...floorChars);
       }
@@ -180,8 +180,8 @@ export class GameArea extends Container {
         animations.push(
           this.moveChar(
             char,
-            elevators[0].position.x - (model.floors[floorIndex].people - floorChars.length) * BIG_TILE_SIZE, 
-            floorChars.length * 100
+            elevators[0].position.x - (model.floors[floorIndex].people - floorChars.length) * BIG_TILE_SIZE,
+            floorChars.length * 100,
           ).then(() => {
             char.scale.x *= -1;
           }),
@@ -197,9 +197,10 @@ export class GameArea extends Container {
     );
   }
 
-  private async moveChar(char: Sprite, posX: number, waitForMs = 0): Promise<void> {
+  private async moveChar(char: MovieClip, posX: number, waitForMs = 0): Promise<void> {
     if (waitForMs > 0) await delay(waitForMs);
     return new Promise((resolve) => {
+      char.isPlaying = true;
       const { tweener } = this;
       const dist = Math.abs(posX - char.position.x);
       tweener.tweenProperty(
@@ -209,6 +210,7 @@ export class GameArea extends Container {
         linear,
         (px) => (char.position.x = px),
         () => {
+          char.stop();
           char.position.x = posX;
           resolve();
         },

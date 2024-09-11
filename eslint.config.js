@@ -40,8 +40,7 @@ export default [
     rules: {
       "no-undef": "off",
       "no-unused-vars": "off",
-      // "@typescript-eslint/no-unused-vars": ["error", { args: "none", caughtErrors: "none" }],
-      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-unused-vars": ["warn", { args: "none", caughtErrors: "none" }],
       "@typescript-eslint/explicit-module-boundary-types": "error",
       "@typescript-eslint/no-explicit-any": ["error", { ignoreRestArgs: true }],
       "no-useless-constructor": "off",

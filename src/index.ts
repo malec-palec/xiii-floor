@@ -1,5 +1,6 @@
 import { loadAssets } from "./assets";
 import { Game } from "./game";
+import { setupRAF } from "./utils";
 
 const main = async () => {
   const assets = await loadAssets();
@@ -25,6 +26,8 @@ const main = async () => {
     game.update(dt);
   };
   loop();
+  
+  // setupRAF(loop);
 
   // no binding by design
   window.addEventListener("orientationchange", game.handleRotation);

@@ -2,12 +2,11 @@ import { getImageRegion } from "../canvas-utils";
 import { DisplayObject } from "./display-object";
 
 export default class SpriteSheet extends DisplayObject {
-  // isVisible = true;
-  private images: HTMLCanvasElement[] = [];
+  protected images: HTMLCanvasElement[] = [];
   constructor(
     [width, height, x = 0, y = 0]: [number, number, number?, number?],
     atlas: DrawImageSource,
-    public frameNum = 0,
+    public index = 0,
   ) {
     super(width, height, x, y);
 
@@ -22,8 +21,7 @@ export default class SpriteSheet extends DisplayObject {
     }
   }
   draw(context: CanvasRenderingContext2D): void {
-    // if (!this.isVisible) return;
-    const { images, frameNum } = this;
-    context.drawImage(images[frameNum], 0, 0);
+    const { images, index } = this;
+    context.drawImage(images[index], 0, 0);
   }
 }

@@ -1,9 +1,7 @@
-import { drawDottedGrid } from "../../canvas-utils";
 import { Button } from "../../display/button";
 import Container from "../../display/container";
 import { FrameShape } from "../../display/shape";
 import { isMobile, TILE_SIZE } from "../../registry";
-import { logDebug } from "../../utils";
 import { LiftController, LiftModel } from "./lift";
 
 export class Sidebar extends Container {
@@ -45,18 +43,18 @@ export class Sidebar extends Container {
 
     // TODO: add reset animation
     const resetButton = new Button(
-      [TILE_SIZE * 3, TILE_SIZE * 3, TILE_SIZE, TILE_SIZE * 5],
+      [TILE_SIZE * 3, TILE_SIZE * 3, TILE_SIZE, TILE_SIZE * 17],
       null,
       "R",
       true,
       resetGame,
     );
-    const undoButton = new Button([TILE_SIZE * 7, TILE_SIZE * 3, TILE_SIZE, TILE_SIZE * 17], null, "Undo", true, () => {
-      logDebug("Undo");
-      // controller.undoStep();
-    });
 
-    this.children.push(frame, ...buttons, resetButton, undoButton);
+    // const undoButton = new Button([TILE_SIZE * 7, TILE_SIZE * 3, TILE_SIZE, TILE_SIZE * 17], null, "Undo", true, () => {
+    // controller.undoStep();
+    // });
+
+    this.children.push(frame, ...buttons, resetButton);
   }
   draw(context: CanvasRenderingContext2D): void {
     super.draw(context);
