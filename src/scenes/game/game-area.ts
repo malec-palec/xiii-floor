@@ -1,5 +1,6 @@
 import { AssetMap } from "../../assets";
 import { colorizeInPlace, eraseColorInPlace } from "../../canvas-utils";
+import { linear } from "../../core/easing";
 import { Event } from "../../core/event";
 import { Tweener } from "../../core/tweener";
 import Container from "../../display/container";
@@ -18,7 +19,7 @@ export class GameArea extends Container {
     private sceneDimensions: GameSceneDimensions,
     private model: LiftModel,
     private controller: LiftController,
-    tweener: Tweener,
+    private tweener: Tweener,
     assets: AssetMap,
   ) {
     const { gameAreaSize, floorHeight, wallSize } = sceneDimensions;
@@ -135,7 +136,7 @@ export class GameArea extends Container {
     numPeople: number,
     isOverweight: boolean,
   ): Promise<void> {
-    const { sceneDimensions } = this;
+    const { sceneDimensions, elevators, model } = this;
 
     if (!isOverweight) await elevator.close();
 
@@ -152,6 +153,7 @@ export class GameArea extends Container {
     let delta = floorChars.length - numPeople;
 
     const { chars } = elevator;
+    const animations: Promise<void>[] = [];
     if (delta > 0) {
       // go in
       if (chars.length > 0) {
@@ -161,8 +163,13 @@ export class GameArea extends Container {
       }
       while (delta > 0) {
         const char = floorChars.shift()!;
-        char.position.x = elevator.getCharPlace(chars.length, elevatorModel.capacity);
-        char.scale.x *= -1;
+        animations.push(
+          this.moveChar(char, elevator.getCharPlace(chars.length, elevatorModel.capacity), chars.length * 100).then(
+            () => {
+              char.scale.x *= -1;
+            },
+          ),
+        );
         chars.push(char);
         delta--;
       }
@@ -170,19 +177,43 @@ export class GameArea extends Container {
       // go out
       while (delta < 0) {
         const char = chars.pop()!;
-        char.position.x = this.elevators[0].position.x - (floorChars.length + 1) * BIG_TILE_SIZE;
-        char.scale.x *= -1;
-        floorChars.push(char);
+        animations.push(
+          this.moveChar(
+            char,
+            elevators[0].position.x - (model.floors[floorIndex].people - floorChars.length) * BIG_TILE_SIZE, 
+            floorChars.length * 100
+          ).then(() => {
+            char.scale.x *= -1;
+          }),
+        );
+        floorChars.unshift(char);
         delta++;
       }
     }
+    if (animations.length > 0) await Promise.all(animations);
 
-    await delay(200);
+    await Promise.all(
+      floorChars.map((char, i) => this.moveChar(char, elevators[0].position.x - (i + 1) * BIG_TILE_SIZE, i * 100)),
+    );
+  }
 
-    for (let i = 0; i < floorChars.length; i++) {
-      const char = floorChars[i];
-      char.position.x = this.elevators[0].position.x - (i + 1) * BIG_TILE_SIZE;
-    }
+  private async moveChar(char: Sprite, posX: number, waitForMs = 0): Promise<void> {
+    if (waitForMs > 0) await delay(waitForMs);
+    return new Promise((resolve) => {
+      const { tweener } = this;
+      const dist = Math.abs(posX - char.position.x);
+      tweener.tweenProperty(
+        (dist / char.width) * 3,
+        char.position.x,
+        posX,
+        linear,
+        (px) => (char.position.x = px),
+        () => {
+          char.position.x = posX;
+          resolve();
+        },
+      );
+    });
   }
 
   protected async handleEvent(event: Event): Promise<void> {
