@@ -1,5 +1,5 @@
 import { AssetMap } from "../../assets";
-import { colorizeInPlace, eraseColorInPlace } from "../../canvas-utils";
+import { colorizeInPlace, eraseColorInPlace, getImageRegion } from "../../canvas-utils";
 import { Event } from "../../core/event";
 import { Tweener } from "../../core/tweener";
 import Container from "../../display/container";
@@ -63,7 +63,7 @@ export class GameArea extends Container {
 
     const [charCanvas, charContext] = assets["c"];
     eraseColorInPlace(charCanvas, charContext);
-    colorizeInPlace(charCanvas, charContext, "#111111");
+    colorizeInPlace(charCanvas, charContext, COLOR_BLACK);
 
     const { floors } = model;
     for (let i = 0; i < floors.length; i++) {
@@ -85,6 +85,38 @@ export class GameArea extends Container {
       }
       this.chars[i] = floorChars;
     }
+
+    const numbers: HTMLCanvasElement[] = [];
+    const [numbersCanvas] = assets["n"];
+    const butRows = numbersCanvas.width / 4;
+    const butCols = numbersCanvas.height / 5;
+    let x: number, y: number, i: number;
+    for (y = 0; y < butCols; y++) {
+      for (x = 0; x < butRows; x++) {
+        i = x + y * butRows;
+        const [numCanvas, numContext] = getImageRegion(numbersCanvas, x * 4, y * 5, 4, 5);
+        eraseColorInPlace(numCanvas, numContext);
+        colorizeInPlace(numCanvas, numContext, COLOR_BLACK);
+        numbers[i] = numCanvas;
+      }
+    }
+
+    const offset = 2;
+    for (let i = 0; i < model.numFloors; i++) {
+      const numStr = String(model.floors[i].no);
+      const first = numStr.length === 2 ? parseInt(numStr[0]) : 0;
+      const second = numStr.length === 2 ? parseInt(numStr[1]) : parseInt(numStr[0]);
+
+      const firstNum = new Sprite(
+        numbers[first],
+        BIG_TILE_SIZE * 15 + offset,
+        gameAreaSize - (i + 1) * floorHeight + 8 + offset,
+      );
+      firstNum.scale.x = firstNum.scale.y = 4;
+      const secondNum = new Sprite(numbers[second], firstNum.position.x + firstNum.width * 4, firstNum.position.y);
+      secondNum.scale.x = secondNum.scale.y = 4;
+      this.children.push(firstNum, secondNum);
+    }
   }
   draw(context: CanvasRenderingContext2D): void {
     const { sceneDimensions, model } = this;
@@ -98,12 +130,6 @@ export class GameArea extends Container {
     context.fillStyle = COLOR_BLACK;
     for (let i = 0; i <= model.numFloors; i++) {
       context.fillRect(0, floorHeight * i, gameAreaSize, wallSize);
-
-      if (i < model.numFloors) {
-        context.fillStyle = "black";
-        context.font = "28px Arial";
-        context.fillText(String(model.floors[i].no), BIG_TILE_SIZE * 15, gameAreaSize - floorHeight * i);
-      }
     }
   }
 

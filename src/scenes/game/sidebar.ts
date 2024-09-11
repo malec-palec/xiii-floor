@@ -65,6 +65,6 @@ export class Sidebar extends Container {
     context.font = "16px Arial";
     context.fillText(`STEPS:${this.model.steps}`, TILE_SIZE, TILE_SIZE * 22);
 
-    drawDottedGrid(context, 0, 0, this.width, this.height, 16);
+    // drawDottedGrid(context, 0, 0, this.width, this.height, 16);
   }
 }
