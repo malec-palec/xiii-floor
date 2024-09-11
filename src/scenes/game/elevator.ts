@@ -42,6 +42,10 @@ export class Elevator extends DisplayObject {
 
     context.fillStyle = COLOR_BLACK;
     context.fillRect(0, -height - borderHeight, width, borderHeight);
+    context.fillRect(width / 4, -height - borderHeight - 1, width / 2, 1);
+
+    context.fillRect(width / 2 - 8, 0, 1, -this.position.y);
+    context.fillRect(width / 2 + 9, 0, 1, -this.position.y);
 
     context.fillStyle = COLOR_WHITE;
     context.fillRect(0, -height, width, height);
