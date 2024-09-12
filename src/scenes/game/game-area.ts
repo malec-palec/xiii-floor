@@ -67,6 +67,10 @@ export class GameArea extends Container {
     eraseColorInPlace(charAnimCanvas, charAnimContext);
     colorizeInPlace(charAnimCanvas, charAnimContext, COLOR_BLACK);
 
+    const [charAnimAltCanvas, charAnimAltContext] = assets["cb"];
+    eraseColorInPlace(charAnimAltCanvas, charAnimAltContext);
+    colorizeInPlace(charAnimAltCanvas, charAnimAltContext, COLOR_BLACK);
+
     const { floors } = model;
     for (let i = 0; i < floors.length; i++) {
       const floor = floors[i];
@@ -75,7 +79,7 @@ export class GameArea extends Container {
         for (let j = 0; j < floor.people; j++) {
           const charAnim = new MovieClip(
             [9, 9, smallElevatorStartPosX - (j + 1) * BIG_TILE_SIZE, gameAreaSize - floorHeight * i],
-            charAnimCanvas,
+            Math.random() < 0.2 ? charAnimAltCanvas : charAnimCanvas,
           );
           charAnim.frames = [0, 1, 0, 2];
           charAnim.scale.x = charAnim.scale.y = 3;
