@@ -50,18 +50,14 @@ export class Sidebar extends Container {
       resetGame,
     );
 
-    // const undoButton = new Button([TILE_SIZE * 7, TILE_SIZE * 3, TILE_SIZE, TILE_SIZE * 17], null, "Undo", true, () => {
-    // controller.undoStep();
-    // });
-
     this.children.push(frame, ...buttons, resetButton);
   }
   draw(context: CanvasRenderingContext2D): void {
     super.draw(context);
 
     context.fillStyle = "White";
-    context.font = "16px Arial";
-    context.fillText(`STEPS:${this.model.steps}`, TILE_SIZE, TILE_SIZE * 22);
+    context.font = "24px Arial";
+    context.fillText(`STEPS: ${this.model.steps}`, TILE_SIZE, TILE_SIZE * 22);
 
     // drawDottedGrid(context, 0, 0, this.width, this.height, 16);
   }

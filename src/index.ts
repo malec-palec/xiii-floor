@@ -1,6 +1,7 @@
 import { loadAssets } from "./assets";
+import { logDebug } from "./core/debug";
 import { Game } from "./game";
-import { logDebug } from "./utils";
+import { setupRAF } from "./utils";
 
 const main = async () => {
   const assets = await loadAssets();
@@ -15,8 +16,6 @@ const main = async () => {
   onblur = () => (focused = false);
 
   const loop = () => {
-    requestAnimationFrame(loop);
-
     if (!focused) return;
 
     now = performance.now();
@@ -25,9 +24,7 @@ const main = async () => {
 
     game.update(dt);
   };
-  loop();
-
-  // setupRAF(loop);
+  setupRAF(loop);
 
   // no binding by design
   window.addEventListener("orientationchange", game.handleRotation);
@@ -38,10 +35,8 @@ main();
 
 onerror = (event) => {
   console.log("[onerror] ::", event);
-  return false;
 };
 
 onunhandledrejection = (event) => {
   logDebug("[onunhandledrejection] ::", event.reason.message);
-  return false;
 };

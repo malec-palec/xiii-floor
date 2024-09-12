@@ -1,5 +1,6 @@
 import { AssetMap } from "../../assets";
 import { colorizeInPlace, eraseColorInPlace } from "../../canvas-utils";
+import { logDebug } from "../../core/debug";
 import { linear } from "../../core/easing";
 import { Event } from "../../core/event";
 import { Tweener } from "../../core/tweener";
@@ -147,18 +148,21 @@ export class GameArea extends Container {
     elevatorModel: ElevatorData,
     numPeople: number,
     isOverweight: boolean,
+    isOut: boolean
   ): Promise<void> {
     const { sceneDimensions, elevators, model } = this;
 
     if (!isOverweight) await elevator.close();
 
     const endY = sceneDimensions.gameAreaSize - sceneDimensions.floorHeight * elevatorModel.floorIndex;
-    await elevator.moveTo(endY, (Math.abs(endY - elevator.position.y) / sceneDimensions.floorHeight) * 20);
+    await elevator.moveTo(endY, (Math.abs(endY - elevator.position.y) / sceneDimensions.floorHeight) * 15);
+
+    if (isOut) {
+      logDebug("You loose!");
+      return;
+    }
 
     if (!isOverweight) await elevator.open();
-
-    // Temp
-    if (isOverweight) await delay(200);
 
     const { floorIndex } = elevatorModel;
     const floorChars = this.chars[floorIndex];
@@ -216,7 +220,7 @@ export class GameArea extends Container {
       const { tweener } = this;
       const dist = Math.abs(posX - char.position.x);
       tweener.tweenProperty(
-        (dist / char.width) * 3,
+        (dist / char.width) * 2,
         char.position.x,
         posX,
         linear,
@@ -240,8 +244,8 @@ export class GameArea extends Container {
           await Promise.all(
             elevators.map((elevator, i) => {
               const elevatorModel = model.elevators[i];
-              const { people } = model.floors[elevatorModel.floorIndex];
-              return this.moveElevator(elevator, elevatorModel, people, data.isOverweight);
+              const people = model.floors[elevatorModel.floorIndex]?.people ?? -1;
+              return this.moveElevator(elevator, elevatorModel, people, data.isOverweight, data.isOut);
             }),
           );
           if (!controller.checkOverweight()) controller.enableInput(true);

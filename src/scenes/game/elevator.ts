@@ -59,7 +59,7 @@ export class Elevator extends DisplayObject {
     return new Promise((resolve) => {
       chars.forEach((char) => (char.isVisible = true));
       tweener.tweenProperty(
-        30,
+        20,
         width / 2,
         0,
         sine,
@@ -95,7 +95,7 @@ export class Elevator extends DisplayObject {
     const { tweener, width, chars } = this;
     return new Promise((resolve) => {
       tweener.tweenProperty(
-        30,
+        20,
         0,
         width / 2,
         sine,

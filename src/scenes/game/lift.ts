@@ -1,3 +1,4 @@
+import { logDebug } from "../../core/debug";
 import { Event, IEventDispatcher } from "../../core/event";
 
 export type FloorData = {
@@ -16,7 +17,7 @@ export const enum LiftAction {
   changeFloor,
 }
 
-type LiftData = { action: LiftAction; isOverweight: boolean };
+type LiftData = { action: LiftAction; isOverweight: boolean; isOut: boolean };
 
 export class LiftEvent extends Event {
   constructor(public data: LiftData) {
@@ -30,6 +31,7 @@ type LiftModelParams = {
   elevators: [ElevatorData, ElevatorData];
   peoplePerFloor: { [key: number]: number };
   unavailableFloorsIndices?: number[];
+  maxSteps?: number;
 };
 
 export class LiftModel {
@@ -42,8 +44,9 @@ export class LiftModel {
     numFloors,
     startFromFloorNo,
     elevators,
-    unavailableFloorsIndices = [],
     peoplePerFloor,
+    unavailableFloorsIndices = [],
+    maxSteps = 20,
   }: LiftModelParams) {
     for (let i = 0; i < numFloors; i++) {
       this.floors[i] = {
@@ -53,6 +56,7 @@ export class LiftModel {
       };
     }
     this.elevators = elevators;
+    this.steps = maxSteps;
   }
 
   get numFloors(): number {
@@ -70,9 +74,26 @@ export class LiftController {
     const hasFloorChanged = newFloorIndex !== model.elevators[0].floorIndex;
     if (!hasFloorChanged) return;
 
-    if (!isOverweight) model.steps++;
+    if (!isOverweight) model.steps--;
+
+    if (model.steps === 0) {
+      logDebug("You loose!");
+    }
+
     model.elevators[0].floorIndex = newFloorIndex;
     model.elevators[1].floorIndex = model.numFloors - 1 - newFloorIndex;
+
+    if (model.elevators[1].floorIndex < 0) {
+      eventDispatcher.dispatchEvent(new LiftEvent({ action: LiftAction.changeFloor, isOverweight, isOut: true }));
+      return;
+    }
+
+    if (
+      model.floors[model.elevators[0].floorIndex].no === 13 ||
+      model.floors[model.elevators[1].floorIndex].no === 13
+    ) {
+      logDebug("You win!");
+    }
 
     const { elevators, floors } = model;
     for (let i = 0; i < elevators.length; i++) {
@@ -90,13 +111,14 @@ export class LiftController {
         elevator.capacity = 0;
       }
     }
-    eventDispatcher.dispatchEvent(new LiftEvent({ action: LiftAction.changeFloor, isOverweight }));
+    eventDispatcher.dispatchEvent(new LiftEvent({ action: LiftAction.changeFloor, isOverweight, isOut: false }));
   }
   checkOverweight(): boolean {
-    // check overweight
-    const { model } = this;
-    if (model.elevators[1].capacity - model.elevators[0].capacity >= 5) {
-      this.processButtonPress(model.elevators[0].floorIndex + 1, true);
+    const {
+      model: { elevators },
+    } = this;
+    if (elevators[1].capacity - elevators[0].capacity >= 5) {
+      this.processButtonPress(elevators[0].floorIndex + 1, true);
       return true;
     }
     return false;
