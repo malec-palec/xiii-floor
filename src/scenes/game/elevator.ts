@@ -41,8 +41,8 @@ export class Elevator extends DisplayObject {
     const { width, height, borderHeight, doorWidth } = this;
 
     context.fillStyle = COLOR_BLACK;
-    context.fillRect(0, -height - borderHeight, width, borderHeight);
-    context.fillRect(width / 4, -height - borderHeight - 1, width / 2, 1);
+    context.fillRect(0, 0, width, -height - borderHeight);
+    context.fillRect(width / 4, 0, width / 2, -height - borderHeight - 1);
 
     context.fillRect(width / 2 - 8, 0, 1, -this.position.y);
     context.fillRect(width / 2 + 9, 0, 1, -this.position.y);
@@ -51,8 +51,8 @@ export class Elevator extends DisplayObject {
     context.fillRect(0, -height, width, height);
 
     context.fillStyle = COLOR_BLACK;
-    context.fillRect(0, -height, doorWidth, height);
-    context.fillRect(width - doorWidth, -height, doorWidth, height);
+    context.fillRect(0, 0, doorWidth, -height - borderHeight);
+    context.fillRect(width - doorWidth, 0, doorWidth, -height - borderHeight);
   }
   open(): Promise<void> {
     const { tweener, width, chars } = this;
