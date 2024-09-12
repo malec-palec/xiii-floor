@@ -2,6 +2,7 @@ import { Event, MouseEvent } from "../core/event";
 import { createPoint, IDisplayObject, Point } from "./display-object";
 
 export default class Container implements IDisplayObject {
+  isVisible = true;
   children: IDisplayObject[] = [];
   position: Point;
   scale: Point;
@@ -15,6 +16,7 @@ export default class Container implements IDisplayObject {
     });
   }
   draw(context: CanvasRenderingContext2D): void {
+    if (!this.isVisible) return;
     this.children.forEach((child) => {
       context.save();
 

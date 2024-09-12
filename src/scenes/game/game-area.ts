@@ -6,7 +6,7 @@ import { Tweener } from "../../core/tweener";
 import Container from "../../display/container";
 import MovieClip from "../../display/movie-clip";
 import SpriteSheet from "../../display/sprite-sheet";
-import { BIG_TILE_SIZE, COLOR_BLACK, COLOR_WHITE, TILE_SIZE } from "../../registry";
+import { BIG_TILE_SIZE, COLOR_BLACK, getColor, TILE_SIZE } from "../../registry";
 import { delay } from "../../utils";
 import { GameSceneDimensions } from "../game-scene";
 import { Elevator, ElevatorShaft } from "./elevator";
@@ -25,7 +25,9 @@ export class GameArea extends Container {
     const { gameAreaSize, floorHeight, wallSize } = sceneDimensions;
     super(wallSize, wallSize);
 
-    const [fencePatternCanvas] = assets["p"];
+    const [fencePatternCanvas, fencePatternContext] = assets["p"];
+    eraseColorInPlace(fencePatternCanvas, fencePatternContext);
+    colorizeInPlace(fencePatternCanvas, fencePatternContext, getColor(0.7));
 
     const fencePattern = c.getContext("2d")!.createPattern(fencePatternCanvas, "repeat")!;
 
@@ -122,7 +124,7 @@ export class GameArea extends Container {
   draw(context: CanvasRenderingContext2D): void {
     const { sceneDimensions, model } = this;
     const { gameAreaSize, floorHeight, wallSize } = sceneDimensions;
-    context.fillStyle = COLOR_WHITE;
+    context.fillStyle = getColor(0.5);
     context.fillRect(0, 0, gameAreaSize, gameAreaSize);
 
     super.draw(context);
