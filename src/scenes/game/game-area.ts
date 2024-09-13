@@ -6,6 +6,7 @@ import { Event } from "../../core/event";
 import { Tweener } from "../../core/tweener";
 import Container from "../../display/container";
 import MovieClip from "../../display/movie-clip";
+import Sprite from "../../display/sprite";
 import SpriteSheet from "../../display/sprite-sheet";
 import { BIG_TILE_SIZE, COLOR_BLACK, getColor, TILE_SIZE } from "../../registry";
 import { delay } from "../../utils";
@@ -16,7 +17,12 @@ import { ElevatorData, LiftAction, LiftController, LiftEvent, LiftModel } from "
 export class GameArea extends Container {
   private chars: MovieClip[][] = [];
   private elevators: [Elevator, Elevator];
+
   private xiiFloorIndex = -1;
+  private xiiFloorDarknessAlpha = 1;
+  private frameCounter = 0;
+  private master: Sprite;
+
   constructor(
     private sceneDimensions: GameSceneDimensions,
     private model: LiftModel,
@@ -107,7 +113,7 @@ export class GameArea extends Container {
       const numStr = String(model.floors[i].no);
       const first = numStr.length === 2 ? parseInt(numStr[0]) : 0;
       const second = numStr.length === 2 ? parseInt(numStr[1]) : parseInt(numStr[0]);
-      
+
       const firstNum = new SpriteSheet(
         [3, 5, BIG_TILE_SIZE * 15, gameAreaSize - (i + 1) * floorHeight + wallSize + offset],
         numbersCanvas,
@@ -121,18 +127,40 @@ export class GameArea extends Container {
       );
       secondNum.scale.x = secondNum.scale.y = scale;
       this.children.push(firstNum, secondNum);
-      
+
       if (numStr === "13") this.xiiFloorIndex = i;
+    }
+
+    const [monsterCanvas, monsterContext] = assets["m"];
+    eraseColorInPlace(monsterCanvas, monsterContext);
+    colorizeInPlace(monsterCanvas, monsterContext, "white");
+    const master = new Sprite(monsterCanvas, 0, (this.xiiFloorIndex - 1) * floorHeight);
+    master.scale.x = master.scale.y = 2;
+    master.isVisible = false;
+    this.children.push(master);
+
+    this.master = master;
+  }
+
+  update(dt: number): void {
+    // return;
+    this.frameCounter = (this.frameCounter + 1) % 1000;
+    this.xiiFloorDarknessAlpha = ~~(this.frameCounter / 50) % 3 === 0 ? 1 : 0;
+    this.master.isVisible = this.xiiFloorDarknessAlpha === 1;
+    if (!this.master.isVisible) {
+      this.master.position.x += 0.2;
     }
   }
   draw(context: CanvasRenderingContext2D): void {
-    const { sceneDimensions, model, xiiFloorIndex } = this;
+    const { sceneDimensions, model, xiiFloorIndex, xiiFloorDarknessAlpha } = this;
     const { gameAreaSize, floorHeight, wallSize } = sceneDimensions;
     context.fillStyle = getColor(0.5);
     context.fillRect(0, 0, gameAreaSize, gameAreaSize);
 
     context.fillStyle = COLOR_BLACK;
+    context.globalAlpha = xiiFloorDarknessAlpha;
     context.fillRect(0, floorHeight * xiiFloorIndex, gameAreaSize, -floorHeight);
+    context.globalAlpha = 1;
 
     super.draw(context);
 
@@ -148,7 +176,7 @@ export class GameArea extends Container {
     elevatorModel: ElevatorData,
     numPeople: number,
     isOverweight: boolean,
-    isOut: boolean
+    isOut: boolean,
   ): Promise<void> {
     const { sceneDimensions, elevators, model } = this;
 

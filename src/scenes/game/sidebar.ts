@@ -1,3 +1,4 @@
+import { drawDottedGrid } from "../../canvas-utils";
 import { Button } from "../../display/button";
 import Container from "../../display/container";
 import { FrameShape } from "../../display/shape";
@@ -59,6 +60,6 @@ export class Sidebar extends Container {
     context.font = "24px Arial";
     context.fillText(`STEPS: ${this.model.steps}`, TILE_SIZE, TILE_SIZE * 22);
 
-    // drawDottedGrid(context, 0, 0, this.width, this.height, 16);
+    drawDottedGrid(context, 0, 0, this.width, this.height, 16);
   }
 }
