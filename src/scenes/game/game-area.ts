@@ -1,6 +1,5 @@
 import { AssetMap } from "../../assets";
 import { colorizeInPlace, eraseColorInPlace } from "../../canvas-utils";
-import { logDebug } from "../../core/debug";
 import { linear } from "../../core/easing";
 import { Event } from "../../core/event";
 import { Tweener } from "../../core/tweener";
@@ -8,9 +7,12 @@ import Container from "../../display/container";
 import MovieClip from "../../display/movie-clip";
 import Sprite from "../../display/sprite";
 import SpriteSheet from "../../display/sprite-sheet";
+import { IGame } from "../../game";
 import { BIG_TILE_SIZE, COLOR_BLACK, getColor, TILE_SIZE } from "../../registry";
 import { delay } from "../../utils";
+import { WinState } from "../end-scene";
 import { GameSceneDimensions } from "../game-scene";
+import { SceneName } from "../scene";
 import { Elevator, ElevatorShaft } from "./elevator";
 import { ElevatorData, LiftAction, LiftController, LiftEvent, LiftModel } from "./lift";
 
@@ -23,12 +25,15 @@ export class GameArea extends Container {
   private frameCounter = 0;
   private master: Sprite;
 
+  private showFeedAnimation = false;
+
   constructor(
     private sceneDimensions: GameSceneDimensions,
     private model: LiftModel,
     private controller: LiftController,
     private tweener: Tweener,
     assets: AssetMap,
+    private game: IGame,
   ) {
     const { gameAreaSize, floorHeight, wallSize } = sceneDimensions;
     super(wallSize, wallSize);
@@ -144,7 +149,9 @@ export class GameArea extends Container {
 
   update(dt: number): void {
     super.update(dt);
-    return;
+
+    if (!this.showFeedAnimation) return;
+
     this.frameCounter = (this.frameCounter + 1) % 1000;
     this.xiiFloorDarknessAlpha = ~~(this.frameCounter / 50) % 3 === 0 ? 1 : 0;
     this.master.isVisible = this.xiiFloorDarknessAlpha === 1;
@@ -187,7 +194,6 @@ export class GameArea extends Container {
     await elevator.moveTo(endY, (Math.abs(endY - elevator.position.y) / sceneDimensions.floorHeight) * 15);
 
     if (isOut) {
-      logDebug("You loose!");
       return;
     }
 
@@ -278,6 +284,12 @@ export class GameArea extends Container {
             }),
           );
           if (!controller.checkOverweight()) controller.enableInput(true);
+          break;
+        case LiftAction.summonMaster:
+          this.showFeedAnimation = true;
+          delay(6 * 1000).then(() => {
+            this.game.changeScene(SceneName.End, WinState.Win);
+          });
           break;
       }
     }

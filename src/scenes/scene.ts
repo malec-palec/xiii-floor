@@ -1,6 +1,7 @@
 export const enum SceneName {
   Title,
   Game,
+  End
 }
 
 export interface IScene {
@@ -11,7 +12,7 @@ export interface IScene {
 }
 
 export interface ISceneManager {
-  changeScene(sceneName: SceneName): void;
+  changeScene(sceneName: SceneName, ...rest: any[]): void;
 }
 
 export class BaseScene implements IScene {

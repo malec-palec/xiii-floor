@@ -1,5 +1,6 @@
 import { AssetMap, IAssetsProvider } from "./assets";
 import { ITweenerProvider, Tweener } from "./core/tweener";
+import { EndScene } from "./scenes/end-scene";
 import { GameScene } from "./scenes/game-scene";
 import { IScene, ISceneManager, SceneName } from "./scenes/scene";
 import { TitleScene } from "./scenes/title-scene";
@@ -19,7 +20,7 @@ export class Game implements IGame {
     this.context = c.getContext("2d", {
       willReadFrequently: true,
     })!;
-    this.scene = new GameScene(this);
+    this.scene = new TitleScene(this);
 
     c.onclick = ({ clientX, clientY }) => {
       const rect = c.getBoundingClientRect();
@@ -31,7 +32,7 @@ export class Game implements IGame {
     };
   }
 
-  changeScene(name: SceneName): void {
+  changeScene(name: SceneName, ...rest: any[]): void {
     const { scene, context } = this;
     scene.destroy();
     context.clearRect(0, 0, c.width, c.height);
@@ -43,6 +44,8 @@ export class Game implements IGame {
       case SceneName.Game:
         newScene = new GameScene(this);
         break;
+      case SceneName.End:
+        newScene = new EndScene(this, ...rest);
     }
     this.scene = newScene;
   }

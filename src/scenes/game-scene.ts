@@ -1,4 +1,3 @@
-import { drawDottedGrid } from "../canvas-utils";
 import { MouseEvent } from "../core/event";
 import Container from "../display/container";
 import { IGame } from "../game";
@@ -58,13 +57,13 @@ export class GameScene extends BaseScene {
         1: 7,
       },
     });
-    const controller = new LiftController(model, root);
+    const controller = new LiftController(model, root, game);
 
     const sceneDimensions = getGameSceneDimensions(model.numFloors);
     const { canvasSize, sidebarSize, sceneWidth, sceneHeight } = sceneDimensions;
     game.resize(sceneWidth, sceneHeight);
 
-    const gameArea = new GameArea(sceneDimensions, model, controller, game.tweener, game.assets);
+    const gameArea = new GameArea(sceneDimensions, model, controller, game.tweener, game.assets, game);
     const sidebar = new Sidebar(
       [
         isMobile ? canvasSize : sidebarSize,
@@ -75,7 +74,7 @@ export class GameScene extends BaseScene {
       game.assets,
       model,
       controller,
-      this.reset.bind(this)
+      this.reset.bind(this),
     );
     root.children.push(gameArea, sidebar);
 
@@ -86,14 +85,12 @@ export class GameScene extends BaseScene {
     this.root.update(dt);
   }
   draw(context: CanvasRenderingContext2D): void {
-    const { canvasSize, wallSize, gameAreaSize } = this.sceneDimensions;
+    const { canvasSize } = this.sceneDimensions;
 
     context.fillStyle = COLOR_BLACK;
     context.fillRect(0, 0, canvasSize, canvasSize);
 
     this.root.draw(context);
-
-    // drawDottedGrid(context, wallSize, wallSize, gameAreaSize, gameAreaSize, 32);
   }
   onClick(mouseX: number, mouseY: number): void {
     this.root.dispatchEvent(new MouseEvent(mouseX, mouseY));

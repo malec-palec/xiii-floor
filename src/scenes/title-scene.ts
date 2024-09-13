@@ -56,7 +56,7 @@ export class TitleScene extends BaseScene {
     context.textAlign = "center";
     context.fillText(titleText, width / 2, height / 2);
 
-    if (~~(frameCounter / 100) % 2 === 0) return;
+    if (~~(frameCounter / 50) % 2 === 0) return;
 
     context.font = "32px Arial";
     context.fillText(`${isMobile ? "tap" : "click"} to start`, width / 2, height * 0.6);

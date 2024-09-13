@@ -1,5 +1,7 @@
-import { logDebug } from "../../core/debug";
 import { Event, IEventDispatcher } from "../../core/event";
+import { IGame } from "../../game";
+import { WinState } from "../end-scene";
+import { SceneName } from "../scene";
 
 export type FloorData = {
   no: number;
@@ -15,6 +17,7 @@ export type ElevatorData = {
 
 export const enum LiftAction {
   changeFloor,
+  summonMaster
 }
 
 type LiftData = { action: LiftAction; isOverweight: boolean; isOut: boolean };
@@ -68,6 +71,7 @@ export class LiftController {
   constructor(
     private model: LiftModel,
     private eventDispatcher: IEventDispatcher,
+    private game: IGame
   ) {}
   processButtonPress(newFloorIndex: number, isOverweight = false): void {
     const { model, eventDispatcher } = this;
@@ -76,8 +80,8 @@ export class LiftController {
 
     if (!isOverweight) model.steps--;
 
-    if (model.steps === 0) {
-      logDebug("You loose!");
+    if (model.steps < 0) {
+      this.game.changeScene(SceneName.End, WinState.Loose);
     }
 
     model.elevators[0].floorIndex = newFloorIndex;
@@ -92,7 +96,7 @@ export class LiftController {
       model.floors[model.elevators[0].floorIndex].no === 13 ||
       model.floors[model.elevators[1].floorIndex].no === 13
     ) {
-      logDebug("You win!");
+      eventDispatcher.dispatchEvent(new LiftEvent({ action: LiftAction.summonMaster, isOverweight: false, isOut: false }));
     }
 
     const { elevators, floors } = model;
