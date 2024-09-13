@@ -143,7 +143,8 @@ export class GameArea extends Container {
   }
 
   update(dt: number): void {
-    // return;
+    super.update(dt);
+    return;
     this.frameCounter = (this.frameCounter + 1) % 1000;
     this.xiiFloorDarknessAlpha = ~~(this.frameCounter / 50) % 3 === 0 ? 1 : 0;
     this.master.isVisible = this.xiiFloorDarknessAlpha === 1;

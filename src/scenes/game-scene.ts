@@ -65,8 +65,6 @@ export class GameScene extends BaseScene {
     game.resize(sceneWidth, sceneHeight);
 
     const gameArea = new GameArea(sceneDimensions, model, controller, game.tweener, game.assets);
-
-    const [frameCanvas] = game.assets["f"];
     const sidebar = new Sidebar(
       [
         isMobile ? canvasSize : sidebarSize,
@@ -74,7 +72,7 @@ export class GameScene extends BaseScene {
         +!isMobile * canvasSize,
         +isMobile * canvasSize,
       ],
-      frameCanvas,
+      game.assets,
       model,
       controller,
       this.reset.bind(this)

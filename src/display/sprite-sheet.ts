@@ -3,6 +3,7 @@ import { DisplayObject } from "./display-object";
 
 export default class SpriteSheet extends DisplayObject {
   protected images: HTMLCanvasElement[] = [];
+  alpha = 1;
   constructor(
     [width, height, x = 0, y = 0]: [number, number, number?, number?],
     atlas: DrawImageSource,
@@ -21,7 +22,9 @@ export default class SpriteSheet extends DisplayObject {
     }
   }
   draw(context: CanvasRenderingContext2D): void {
-    const { images, index } = this;
+    const { images, index, alpha } = this;
+    context.globalAlpha = alpha;
     context.drawImage(images[index], 0, 0);
+    context.globalAlpha = 1;
   }
 }
