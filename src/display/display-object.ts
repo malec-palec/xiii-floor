@@ -1,11 +1,5 @@
 import { Event, IEventDispatcher } from "../core/event";
-
-export type Point = {
-  x: number;
-  y: number;
-};
-
-export const createPoint = (x = 0, y = x): Point => ({ x, y });
+import { createPoint, Point } from "../core/geom";
 
 export interface IDisplayObject extends IEventDispatcher {
   isVisible: boolean;

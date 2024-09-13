@@ -1,4 +1,5 @@
-import { createPoint, DisplayObject } from "./display-object";
+import { createPoint } from "../core/geom";
+import { DisplayObject } from "./display-object";
 
 export default class Sprite extends DisplayObject {
   pivot = createPoint();

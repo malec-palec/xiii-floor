@@ -1,4 +1,5 @@
 import { sine } from "../../core/easing";
+import { findIntersection, line } from "../../core/geom";
 import { Tweener } from "../../core/tweener";
 import { DisplayObject } from "../../display/display-object";
 import MovieClip from "../../display/movie-clip";
@@ -53,6 +54,16 @@ export class Elevator extends DisplayObject {
     context.fillStyle = COLOR_BLACK;
     context.fillRect(0, 0, doorWidth, -height - borderHeight);
     context.fillRect(width - doorWidth, 0, doorWidth, -height - borderHeight);
+
+    context.fillStyle = COLOR_WHITE;
+    context.globalAlpha = 0.4;
+    for (let px = doorWidth; px < width - doorWidth; px++) {
+      const p = findIntersection({ x: px, y: -height }, { x: width, y: -height - width * 1.5 }, 0);
+      line(p, { x: px, y: -height }, (x, y) => {
+        context.fillRect(x, y, 1, 1);
+      });
+    }
+    context.globalAlpha = 1;
   }
   open(): Promise<void> {
     const { tweener, width, chars } = this;

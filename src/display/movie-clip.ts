@@ -1,4 +1,4 @@
-import { createPoint } from "./display-object";
+import { createPoint } from "../core/geom";
 import SpriteSheet from "./sprite-sheet";
 
 export default class MovieClip extends SpriteSheet {

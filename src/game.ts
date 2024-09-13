@@ -16,7 +16,9 @@ export class Game implements IGame {
   tweener = new Tweener();
 
   constructor(public assets: AssetMap) {
-    this.context = c.getContext("2d")!;
+    this.context = c.getContext("2d", {
+      willReadFrequently: true,
+    })!;
     this.scene = new GameScene(this);
 
     c.onclick = ({ clientX, clientY }) => {

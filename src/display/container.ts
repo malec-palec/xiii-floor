@@ -1,5 +1,6 @@
 import { Event, MouseEvent } from "../core/event";
-import { createPoint, IDisplayObject, Point } from "./display-object";
+import { createPoint, Point } from "../core/geom";
+import { IDisplayObject } from "./display-object";
 
 export default class Container implements IDisplayObject {
   isVisible = true;
