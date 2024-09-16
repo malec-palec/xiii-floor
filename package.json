@@ -17,7 +17,7 @@
   },
   "keywords": [],
   "author": "glebv",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "devDependencies": {
     "@assetpack/core": "^1.1.1",
     "@eslint/js": "^9.9.1",
