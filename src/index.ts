@@ -1,5 +1,5 @@
+import "./styles.css";
 import { loadAssets } from "./assets";
-import { logDebug } from "./core/debug";
 import { Game } from "./game";
 import { setupRAF } from "./utils";
 
@@ -32,11 +32,3 @@ const main = async () => {
 };
 
 main();
-
-onerror = (event) => {
-  console.log("[onerror] ::", event);
-};
-
-onunhandledrejection = (event) => {
-  logDebug("[onunhandledrejection] ::", event.reason.message);
-};
