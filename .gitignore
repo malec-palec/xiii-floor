@@ -1,6 +1,4 @@
 .vscode/
 dist/
 node_modules/
-out/
-tools/
 src/assets/

@@ -4,15 +4,14 @@
   "description": "js13kGames 2024 competition entry",
   "private": "true",
   "scripts": {
-    "start": "start vite --open --host",
+    "start": "vite --open --host",
     "prebuild": "assetpack && node ./scripts/process-assets.js",
-    "build": "vite build",
+    "build": "tsc --noEmit && vite build",
     "preview": "vite preview --open --host",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
-    "format:check": "prettier . --check",
-    "test": "tsc --noEmit"
+    "format:check": "prettier . --check"
   },
   "keywords": [],
   "author": "glebv",

@@ -13,3 +13,7 @@ Execute `npm run build` command to build the game.
 ## Run
 
 Execute `npm run preview` command to launch it.
+
+## Dev
+
+Execute `npm start` command to start dev-server.
