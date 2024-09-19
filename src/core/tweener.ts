@@ -1,10 +1,5 @@
 type UpdateTween = () => void;
-
-export interface ITweenerProvider {
-  readonly tweener: Tweener;
-}
-
-export class Tweener {
+class Tweener {
   private tweens: UpdateTween[] = [];
 
   tweenProperty(
@@ -41,3 +36,5 @@ export class Tweener {
     }
   }
 }
+
+export const tweener = new Tweener();

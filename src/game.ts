@@ -1,12 +1,11 @@
-import { AssetMap, IAssetsProvider } from "./assets";
-import { ITweenerProvider, Tweener } from "./core/tweener";
+import { tweener } from "./core/tweener";
 import { EndScene } from "./scenes/end-scene";
 import { GameScene } from "./scenes/game-scene";
 import { IScene, ISceneManager, SceneName } from "./scenes/scene";
 import { TitleScene } from "./scenes/title-scene";
 import { clamp } from "./utils";
 
-export interface IGame extends ISceneManager, IAssetsProvider, ITweenerProvider {
+export interface IGame extends ISceneManager {
   resize(width: number, height: number): void;
 }
 
@@ -14,9 +13,7 @@ export class Game implements IGame {
   private context: CanvasRenderingContext2D;
   private scene: IScene;
 
-  tweener = new Tweener();
-
-  constructor(public assets: AssetMap) {
+  constructor() {
     this.context = c.getContext("2d", {
       willReadFrequently: true,
     })!;
@@ -51,7 +48,7 @@ export class Game implements IGame {
   }
 
   update(dt: number): void {
-    const { scene, tweener, context } = this;
+    const { scene, context } = this;
     scene.update(dt);
     tweener.update(dt);
 

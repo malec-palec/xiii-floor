@@ -1,4 +1,4 @@
-import { AssetMap } from "../../assets";
+import { assets } from "../../assets";
 import { ButtonSensor } from "../../display/button-sensor";
 import Container from "../../display/container";
 import MovieClip from "../../display/movie-clip";
@@ -18,7 +18,6 @@ export class Sidebar extends Container {
 
   constructor(
     [width, height, x = 0, y = 0]: [number, number, number, number],
-    assets: AssetMap,
     private model: LiftModel,
     controller: LiftController,
     resetGame: () => void,

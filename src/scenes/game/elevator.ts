@@ -1,6 +1,6 @@
 import { sine } from "../../core/easing";
 import { findIntersection, line } from "../../core/geom";
-import { Tweener } from "../../core/tweener";
+import { tweener } from "../../core/tweener";
 import { DisplayObject } from "../../display/display-object";
 import MovieClip from "../../display/movie-clip";
 import { COLOR_BLACK, COLOR_WHITE } from "../../registry";
@@ -31,10 +31,8 @@ export class Elevator extends DisplayObject {
   readonly chars: MovieClip[] = [];
   private borderHeight = 2;
   private doorWidth: number = 0;
-  // TODO: make tweener global
   constructor(
     [width, height, x = 0, y = 0]: [number, number, number, number],
-    private tweener: Tweener,
   ) {
     super(width, height, x, y);
   }
@@ -66,7 +64,7 @@ export class Elevator extends DisplayObject {
     context.globalAlpha = 1;
   }
   open(): Promise<void> {
-    const { tweener, width, chars } = this;
+    const { width, chars } = this;
     return new Promise((resolve) => {
       chars.forEach((char) => (char.isVisible = true));
       tweener.tweenProperty(
@@ -83,7 +81,7 @@ export class Elevator extends DisplayObject {
     });
   }
   moveTo(targetY: number, duration: number): Promise<void> {
-    const { tweener, position, chars } = this;
+    const { position, chars } = this;
     return new Promise((resolve) => {
       tweener.tweenProperty(
         duration,
@@ -103,7 +101,7 @@ export class Elevator extends DisplayObject {
     });
   }
   close(): Promise<void> {
-    const { tweener, width, chars } = this;
+    const { width, chars } = this;
     return new Promise((resolve) => {
       tweener.tweenProperty(
         20,

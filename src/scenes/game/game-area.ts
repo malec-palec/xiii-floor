@@ -1,8 +1,8 @@
-import { AssetMap } from "../../assets";
+import { assets } from "../../assets";
 import { colorizeInPlace, eraseColorInPlace } from "../../canvas-utils";
 import { linear } from "../../core/easing";
 import { Event } from "../../core/event";
-import { Tweener } from "../../core/tweener";
+import { tweener } from "../../core/tweener";
 import Container from "../../display/container";
 import MovieClip from "../../display/movie-clip";
 import Sprite from "../../display/sprite";
@@ -31,8 +31,6 @@ export class GameArea extends Container {
     private sceneDimensions: GameSceneDimensions,
     private model: LiftModel,
     private controller: LiftController,
-    private tweener: Tweener,
-    assets: AssetMap,
     private game: IGame,
   ) {
     const { gameAreaSize, floorHeight, wallSize } = sceneDimensions;
@@ -58,7 +56,6 @@ export class GameArea extends Container {
         smallElevatorStartPosX,
         gameAreaSize - floorHeight * smallElevatorModel.floorIndex,
       ],
-      tweener,
     );
 
     const largeElevatorStartPosX = bigTileSize * 11;
@@ -72,7 +69,6 @@ export class GameArea extends Container {
         largeElevatorStartPosX,
         gameAreaSize - floorHeight * largeElevatorModel.floorIndex,
       ],
-      tweener,
     );
     this.elevators = [smallElevator, largeElevator];
 
@@ -252,7 +248,6 @@ export class GameArea extends Container {
     if (waitForMs > 0) await delay(waitForMs);
     return new Promise((resolve) => {
       char.isPlaying = true;
-      const { tweener } = this;
       const dist = Math.abs(posX - char.position.x);
       tweener.tweenProperty(
         (dist / char.width) * 2,

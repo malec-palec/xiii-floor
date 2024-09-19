@@ -1,11 +1,10 @@
-import "./styles.css";
 import { loadAssets } from "./assets";
 import { Game } from "./game";
+import "./styles.css";
 import { setupRAF } from "./utils";
 
-const main = async () => {
-  const assets = await loadAssets();
-  const game = new Game(assets);
+loadAssets(() => {
+  const game = new Game();
 
   let now: number;
   let dt: number;
@@ -29,6 +28,4 @@ const main = async () => {
   // no binding by design
   window.addEventListener("orientationchange", game.handleRotation);
   game.handleRotation();
-};
-
-main();
+});

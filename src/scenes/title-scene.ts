@@ -1,4 +1,5 @@
 import { sine } from "../core/easing";
+import { tweener } from "../core/tweener";
 import { IGame } from "../game";
 import { COLOR_BLACK, COLOR_WHITE, isMobile } from "../registry";
 import { getGameSceneDimensions } from "./game-scene";
@@ -23,7 +24,7 @@ export class TitleScene extends BaseScene {
     onclick = () => {
       onclick = null;
       // TODO: tune tween
-      game.tweener.tweenProperty(
+      tweener.tweenProperty(
         30,
         this.doorWidth,
         0,
